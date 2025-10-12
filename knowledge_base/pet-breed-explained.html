@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pet Breed Classification — Explained!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F5F0FF;--card:#FFF;--simple:#3498DB;--improved:#E67E22;--transfer:#27AE60;--fail:#E74C3C;--text:#2D3436;--text-light:#636E72;--shadow:0 4px 24px rgba(108,92,231,.08);--radius:18px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#6C5CE7 0%,#A29BFE 40%,#FD79A8 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20c-2-2-4-2-6 0s-2 4 0 6 4 2 6 0 2-4 0-6z'/%3E%3C/g%3E%3C/svg%3E")}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(1.8rem,5vw,3rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero p{color:rgba(255,255,255,.88);font-size:1.1rem;max-width:680px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.18rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text-light);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text-light)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:14000px}
+  .section-content{padding:0 26px 26px}
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid var(--improved);border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:var(--improved)}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid var(--transfer);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:var(--transfer)}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid var(--fail);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:var(--fail)}
+  .info-box{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-left:4px solid var(--simple);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:var(--simple)}
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.86rem}
+  .nice-table th{padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500;color:#fff}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:nth-child(even) td{background:#fafafa}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+
+  .podium{display:flex;justify-content:center;align-items:flex-end;gap:16px;margin:24px 0;flex-wrap:wrap}
+  .podium-place{text-align:center;border-radius:14px 14px 0 0;padding:18px 20px 14px;color:#fff;min-width:140px}
+  .podium-place h4{font-family:'Fredoka',sans-serif;font-size:.95rem;margin-bottom:4px}
+  .podium-place .score{font-family:'Fredoka',sans-serif;font-size:2.2rem;font-weight:700;line-height:1.1}
+  .podium-place .detail{font-size:.78rem;opacity:.85;margin-top:4px}
+  .podium-bar{width:100%;border-radius:0 0 14px 14px}
+
+  .bar-visual{margin:14px 0}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .bar-label{width:110px;font-weight:600;font-size:.82rem;text-align:right;flex-shrink:0}
+  .bar-track{flex:1;height:30px;background:#f0f0f0;border-radius:8px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-weight:600;color:#fff;font-size:.8rem}
+
+  .flow{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:16px 0;justify-content:center}
+  .flow-box{color:#fff;padding:8px 12px;border-radius:10px;font-size:.75rem;font-weight:500;text-align:center;min-width:70px}
+  .flow-arrow{font-size:1rem;color:#636E72}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🐾 Pet Breed Classification</h1>
+  <p>37 breeds of cats and dogs. 3 models compared: Simple CNN, Improved CNN, and Transfer Learning. One dominates completely. Here's the full story!</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ BIG PICTURE ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE7F6;">🗺️</div>
+    <div>
+      <div class="section-title">The Big Picture — A Much Harder Challenge</div>
+      <div class="section-subtitle">From 2 classes (dog vs cat) to 37 specific breeds!</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>The Dogs vs Cats project asked: "Is this a dog or a cat?" (2 classes). This project asks: <strong>"Is this a Pug, a Samoyed, a Bengal, a Siamese, or one of 33 other breeds?"</strong> That's 18.5× harder!</p>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> The previous project was like a True/False quiz — you have a 50% chance even by guessing. This project is like a 37-option multiple choice test where random guessing gives you only a <strong>2.7% chance</strong> of being right. The AI must learn subtle differences — floppy ears vs pointed ears, long snout vs flat face, fur patterns and colors.
+    </div>
+
+    <p>Three models are tested, each more sophisticated than the last:</p>
+    <table class="nice-table">
+      <tr><th style="background:#6C5CE7">Model</th><th style="background:#6C5CE7">Approach</th><th style="background:#6C5CE7">Test Accuracy</th></tr>
+      <tr><td>🔵 Simple CNN</td><td>Basic conv layers, no BatchNorm</td><td style="color:var(--fail);font-weight:700">13.7%</td></tr>
+      <tr><td>🟠 Improved CNN</td><td>+ BatchNorm + 4th conv block + GlobalAvgPool</td><td style="color:var(--fail);font-weight:700">2.5%</td></tr>
+      <tr><td>🟢 Transfer Learning</td><td>MobileNetV2 pre-trained on ImageNet</td><td style="color:var(--transfer);font-weight:700">77.8%</td></tr>
+    </table>
+  </div></div>
+</div>
+
+<!-- ═══════════ THE DATASET ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFEAA7;">📸</div>
+    <div>
+      <div class="section-title">The Dataset — Oxford-IIIT Pet Dataset</div>
+      <div class="section-subtitle">37 breeds, ~7,300 images, loaded via TensorFlow Datasets</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <table class="nice-table">
+      <tr><th style="background:var(--improved)">Property</th><th style="background:var(--improved)">Value</th></tr>
+      <tr><td><strong>Source</strong></td><td>Oxford-IIIT Pet Dataset (via TensorFlow Datasets)</td></tr>
+      <tr><td><strong>Total Classes</strong></td><td>37 breeds (25 dog breeds + 12 cat breeds)</td></tr>
+      <tr><td><strong>Training Samples</strong></td><td>2,944</td></tr>
+      <tr><td><strong>Validation Samples</strong></td><td>736</td></tr>
+      <tr><td><strong>Test Samples</strong></td><td>3,669</td></tr>
+      <tr><td><strong>Image Size</strong></td><td>128 × 128 pixels (resized)</td></tr>
+      <tr><td><strong>Batch Size</strong></td><td>32</td></tr>
+      <tr><td><strong>Epochs</strong></td><td>10 (with early stopping)</td></tr>
+    </table>
+
+    <p>Sample breeds include: Abyssinian, American Bulldog, Basset Hound, Beagle, Bengal, Birman, Bombay, Boxer, British Shorthair, Chihuahua, Pug, Samoyed, Yorkshire Terrier, and many more.</p>
+
+    <h3 class="sub" style="color:var(--improved);">Data Augmentation</h3>
+    <p>Training images are augmented with random horizontal flips, 90° rotations, brightness changes, and contrast changes. This helps the model generalize by seeing each image from different angles and lighting conditions.</p>
+
+    <div class="warning">
+      <strong>⚠️ Key Challenge:</strong> Only ~80 images per class for training! This is VERY little data. For context, ImageNet has ~1,000 images per class. With so little data, building a good CNN from scratch is extremely difficult — which is exactly what the results show.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ MODEL 1: SIMPLE CNN ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D6EAF8;">🔵</div>
+    <div>
+      <div class="section-title">Model 1: Simple CNN — The Baseline</div>
+      <div class="section-subtitle">3 conv blocks → Flatten → Dense → 37 classes</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--simple);">Conv 32<br>+ Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--simple);">Conv 64<br>+ Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--simple);">Conv 128<br>+ Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">Flatten</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">Dense 512<br>+ Drop 50%</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#2D3436;">Softmax<br>37 classes</div>
+    </div>
+
+    <p>This is a straightforward CNN — the same kind from Part 4 and the Dogs vs Cats project. No BatchNorm, no advanced techniques.</p>
+
+    <div class="warning">
+      <strong>❌ Result: 13.7% accuracy</strong> — barely better than random guessing (2.7%). Over 10 epochs, training accuracy only crawled from 2.8% to ~16%. The model simply cannot learn 37 breeds from ~80 examples each with only 3 convolutional blocks.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ MODEL 2: IMPROVED CNN ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FDEBD0;">🟠</div>
+    <div>
+      <div class="section-title">Model 2: Improved CNN — More Layers, Still Fails</div>
+      <div class="section-subtitle">4 conv blocks + BatchNorm + GlobalAveragePooling</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>The second model adds improvements from Part 4's lessons: <strong>BatchNormalization</strong> after every conv layer, a <strong>4th convolutional block</strong> (256 filters), <strong>GlobalAveragePooling2D</strong> instead of Flatten (reduces overfitting), and <strong>Top-5 accuracy</strong> tracking.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--improved);">Conv 32<br>+ BN + Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--improved);">Conv 64<br>+ BN + Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--improved);">Conv 128<br>+ BN + Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--improved);">Conv 256<br>+ BN + Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">GlobalAvg<br>Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#2D3436;">Dense 512<br>→ 37</div>
+    </div>
+
+    <div class="warning">
+      <strong>❌ Result: 2.5% accuracy</strong> — even WORSE than the Simple CNN! Early stopping triggered after just 3 epochs because validation loss was increasing. The model with more parameters overfit to the tiny training set even faster, and the aggressive augmentation (90° rotations) likely made the already-small training set harder to learn from.
+    </div>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Giving a harder test to a student who was already struggling doesn't help! More layers need MORE data to train properly. With only ~80 images per breed, even a well-designed CNN can't learn from scratch. This is the key lesson of this notebook.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ MODEL 3: TRANSFER LEARNING ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D5F5E3;">🟢</div>
+    <div>
+      <div class="section-title">Model 3: Transfer Learning — Standing on Giants' Shoulders</div>
+      <div class="section-subtitle">MobileNetV2 (pre-trained on ImageNet) + custom head</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="analogy">
+      <strong>🎓 School Analogy:</strong> Imagine two students taking an advanced biology exam. Student A has never studied biology before and has 10 weeks to prepare from scratch. Student B already has a PhD in general biology and just needs to learn the specific exam topics. Who does better?<br><br>
+      <strong>Transfer Learning</strong> is Student B. MobileNetV2 was already trained on <strong>ImageNet (14 million images, 1,000 classes)</strong> — it already knows what edges, textures, shapes, eyes, ears, fur, and faces look like. We just add a small "head" on top to specialize it for our 37 pet breeds.
+    </div>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--transfer);">MobileNetV2<br>🔒 FROZEN<br>(ImageNet)</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">GlobalAvg<br>Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">Dropout<br>20%</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">Dense 128<br>ReLU</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">Dropout<br>20%</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#2D3436;">Softmax<br>37 classes</div>
+    </div>
+
+    <h3 class="sub" style="color:var(--transfer);">How Transfer Learning Works</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--transfer)">Step</th><th style="background:var(--transfer)">What Happens</th></tr>
+      <tr><td><strong>1. Load MobileNetV2</strong></td><td>Download the model pre-trained on ImageNet (14M images). It already understands general visual features.</td></tr>
+      <tr><td><strong>2. Freeze Base</strong></td><td>Lock all MobileNetV2 weights — don't change what it already learned. Only train the new layers.</td></tr>
+      <tr><td><strong>3. Add Custom Head</strong></td><td>Add a GlobalAveragePooling + Dense(128) + Dense(37) on top for our specific 37-breed classification.</td></tr>
+      <tr><td><strong>4. Train Head Only</strong></td><td>Only the new layers learn. This is fast and works with tiny datasets because most of the "knowledge" is already baked in.</td></tr>
+    </table>
+
+    <div class="key-point">
+      <strong>✅ Result: 77.8% accuracy!</strong> By epoch 1 it was already at 70% val accuracy — because the frozen base already "sees" like a pro. By epoch 9 it peaked at 87.9% validation accuracy. The final test accuracy of 77.8% across 37 breeds is impressive given just 10 epochs of training only the head layers.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ THE RESULTS ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFEAA7;">🏆</div>
+    <div>
+      <div class="section-title">The Results — A Total Blowout</div>
+      <div class="section-subtitle">Transfer Learning crushes both CNNs trained from scratch</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="podium">
+      <div>
+        <div class="podium-place" style="background:var(--simple);">
+          <h4>🔵 Simple CNN</h4>
+          <div class="score">13.7%</div>
+          <div class="detail">3 conv blocks, no BN</div>
+        </div>
+        <div class="podium-bar" style="height:30px;background:var(--simple);"></div>
+      </div>
+      <div>
+        <div class="podium-place" style="background:var(--fail);">
+          <h4>🟠 Improved CNN</h4>
+          <div class="score">2.5%</div>
+          <div class="detail">4 blocks + BN (early stop!)</div>
+        </div>
+        <div class="podium-bar" style="height:8px;background:var(--fail);"></div>
+      </div>
+      <div>
+        <div class="podium-place" style="background:var(--transfer);">
+          <h4>🟢 Transfer Learning</h4>
+          <div class="score">77.8%</div>
+          <div class="detail">MobileNetV2 + head</div>
+        </div>
+        <div class="podium-bar" style="height:140px;background:var(--transfer);"></div>
+      </div>
+    </div>
+
+    <h3 class="sub">Accuracy Comparison</h3>
+    <div class="bar-visual">
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--simple);">Simple CNN</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:13.7%;background:var(--simple);">13.7%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--fail);">Improved CNN</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:5%;background:var(--fail);font-size:.7rem;">2.5%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--transfer);">Transfer Learn</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:77.8%;background:var(--transfer);">77.8%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:#B2BEC3;">Random Guess</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:5%;background:#B2BEC3;font-size:.7rem;">2.7%</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub" style="color:var(--transfer);">Best & Worst Breed Performance (Transfer Learning)</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--transfer)">Top 5 Breeds (F1)</th><th style="background:var(--transfer)">Score</th><th style="background:var(--fail)">Bottom 5 Breeds (F1)</th><th style="background:var(--fail)">Score</th></tr>
+      <tr><td>🥇 Pug</td><td>0.916</td><td>Chihuahua</td><td>0.659</td></tr>
+      <tr><td>🥈 Keeshond</td><td>0.911</td><td>Ragdoll</td><td>0.627</td></tr>
+      <tr><td>🥉 Samoyed</td><td>0.903</td><td>British Shorthair</td><td>0.592</td></tr>
+      <tr><td>Newfoundland</td><td>0.888</td><td>Staffordshire Bull Terrier</td><td>0.549</td></tr>
+      <tr><td>Scottish Terrier</td><td>0.879</td><td>American Pit Bull Terrier</td><td>0.535</td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>📌 Why some breeds are harder:</strong> Pugs and Samoyeds have very distinctive looks — flat face, white fluffy coat. But Staffordshire Bull Terriers and American Pit Bull Terriers look almost identical to each other, so the model confuses them. Similarly, some cat breeds like Ragdoll and British Shorthair share similar features.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ WHY TRANSFER LEARNING WINS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8EAF6;">💡</div>
+    <div>
+      <div class="section-title">Why Transfer Learning Wins So Dramatically</div>
+      <div class="section-subtitle">The fundamental lesson of this entire notebook</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <table class="nice-table">
+      <tr><th style="background:#6C5CE7">Factor</th><th style="background:#6C5CE7">From Scratch</th><th style="background:#6C5CE7">Transfer Learning</th></tr>
+      <tr><td><strong>Starting Knowledge</strong></td><td>Zero — learns everything from scratch</td><td>Already knows edges, textures, shapes, eyes, faces from 14M images</td></tr>
+      <tr><td><strong>Data Needed</strong></td><td>Thousands per class minimum</td><td>Works well with ~80 per class!</td></tr>
+      <tr><td><strong>Training Time</strong></td><td>Needs many epochs (still bad)</td><td>Good results in 1 epoch!</td></tr>
+      <tr><td><strong>Parameters to Train</strong></td><td>All millions of them</td><td>Only the small head (~25K)</td></tr>
+      <tr><td><strong>Risk of Overfitting</strong></td><td>Very high (tiny dataset)</td><td>Low (most weights frozen)</td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 The Ultimate Analogy:</strong> Training from scratch is like teaching a baby to recognize 37 breeds of animals using only 80 photos of each, with no prior knowledge of what "eyes," "fur," or "legs" even are. Transfer learning is like giving an experienced veterinarian who has seen millions of animals a quick briefing: "Here are the 37 breeds you'll see today." One takes years; the other takes minutes.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Rule of Thumb:</strong> In practice, you should ALMOST ALWAYS use transfer learning for image tasks. Training from scratch only makes sense when you have hundreds of thousands of images AND your domain is very different from ImageNet (like medical X-rays or satellite imagery) — and even then, fine-tuning a pre-trained model usually wins.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ SUMMARY ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D5F5E3;">🎓</div>
+    <div>
+      <div class="section-title">Summary — What You Learned!</div>
+      <div class="section-subtitle">The key takeaways from this project</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #1 — Small Data + Complex Task = Use Transfer Learning.</strong> With only ~80 images per class and 37 classes, CNNs trained from scratch can't learn meaningful features. Transfer learning solves this by bringing pre-learned knowledge.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #2 — More Layers ≠ Better Results.</strong> The "Improved" CNN performed WORSE (2.5%) than the Simple CNN (13.7%) because more parameters on tiny data = more overfitting. Complexity without sufficient data is counterproductive.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #3 — Transfer Learning is the #1 tool in practice.</strong> MobileNetV2 + a tiny head achieved 77.8% accuracy on 37 breeds in just 10 epochs. In industry, this is almost always the approach for image classification.
+    </div>
+
+    <div style="background:linear-gradient(135deg,#6C5CE7,#FD79A8);border-radius:14px;padding:20px;margin-top:16px;color:#fff;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">🗺️ Your Complete ML Journey:</h4>
+      <p style="opacity:.92;font-size:.9rem;">
+      <strong>Part 1:</strong> ML fundamentals & preprocessing<br>
+      <strong>Part 2:</strong> Regression deep dive<br>
+      <strong>Part 3:</strong> Classification with traditional ML<br>
+      <strong>Part 4:</strong> Neural networks, CNNs, RNNs theory<br>
+      <strong>Dogs vs Cats:</strong> Binary CNN project (93.6% accuracy)<br>
+      <strong>Pet Breeds:</strong> Multi-class CNN + Transfer Learning (77.8% on 37 breeds!)<br><br>
+      You've gone from basic ML concepts all the way to real-world deep learning projects with transfer learning! 🚀
+      </p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIAR Dataset: Fake News Detection — Explained!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F8F9FA;--card:#FFF;--news:#1A1A2E;--true:#27AE60;--false:#E74C3C;--half:#F39C12;--pants:#9B59B6;--accent:#3498DB;--text:#2D3436;--text-light:#636E72;--shadow:0 4px 24px rgba(26,26,46,.08);--radius:18px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#1A1A2E 0%,#16213E 50%,#0F3460 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 50px,rgba(255,255,255,.02) 50px,rgba(255,255,255,.02) 51px)}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(1.8rem,5vw,3rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero h1 span{color:#E94560}
+  .hero p{color:rgba(255,255,255,.8);font-size:1.1rem;max-width:680px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.18rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text-light);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text-light)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:14000px}
+  .section-content{padding:0 26px 26px}
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid var(--half);border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:#E67E22}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid var(--true);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:var(--true)}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid var(--false);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:var(--false)}
+  .info-box{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-left:4px solid var(--accent);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:var(--accent)}
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.86rem}
+  .nice-table th{padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500;color:#fff}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:nth-child(even) td{background:#fafafa}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+
+  .bar-visual{margin:14px 0}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .bar-label{width:110px;font-weight:600;font-size:.8rem;text-align:right;flex-shrink:0}
+  .bar-track{flex:1;height:30px;background:#f0f0f0;border-radius:8px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-weight:600;color:#fff;font-size:.78rem}
+
+  .label-chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.78rem;font-weight:600;color:#fff;margin:2px}
+  .example-box{background:#f8f9fa;border-radius:10px;padding:14px;margin:8px 0;font-size:.88rem;border-left:3px solid}
+  .example-box .stmt{font-style:italic;color:#555}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>📰 <span>Fake News</span> Detection</h1>
+  <p>The LIAR Dataset — 6 truth levels, 5 ML models, and a humbling lesson about why detecting fake news is one of the hardest problems in NLP.</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ BIG PICTURE ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE7F6;">🗺️</div>
+    <div>
+      <div class="section-title">The Big Picture — Can AI Detect Lies?</div>
+      <div class="section-subtitle">Spoiler: this is MUCH harder than dogs vs cats</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>This notebook tackles one of the hardest problems in NLP (Natural Language Processing): given a political statement, can AI determine how truthful it is? The LIAR dataset contains <strong>12,791 real political statements</strong> labeled by PolitiFact fact-checkers into 6 truth levels.</p>
+
+    <p>Five models are tested — and the results are sobering. The best model only achieves <strong>25.6% accuracy</strong>. But this isn't a failure story — it's a critical lesson about the limits of ML and what makes some problems fundamentally harder than others.</p>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Previous projects were like identifying animals from photos — you can SEE the difference. This is like reading a student's essay and determining if they made up their facts, with only the text to go on, no references. Even HUMANS disagree on truth ratings — that's what makes this so hard.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ THE DATASET ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFEAA7;">📊</div>
+    <div>
+      <div class="section-title">The LIAR Dataset — 6 Shades of Truth</div>
+      <div class="section-subtitle">11,524 train / 1,267 test — real PolitiFact statements</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Unlike binary "true/false" classification, LIAR has <strong>6 classes</strong> along a truth spectrum:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--news)">Label</th><th style="background:var(--news)">Meaning</th><th style="background:var(--news)">Train Count</th><th style="background:var(--news)">Test Count</th></tr>
+      <tr><td><span class="label-chip" style="background:var(--true);">true</span></td><td>Fully accurate</td><td>1,845</td><td>208</td></tr>
+      <tr><td><span class="label-chip" style="background:#2ECC71;">mostly-true</span></td><td>Accurate but needs context</td><td>2,213</td><td>241</td></tr>
+      <tr><td><span class="label-chip" style="background:var(--half);">half-true</span></td><td>Partially accurate</td><td>2,362</td><td>265</td></tr>
+      <tr><td><span class="label-chip" style="background:#E67E22;">barely-true</span></td><td>Mostly inaccurate</td><td>1,891</td><td>212</td></tr>
+      <tr><td><span class="label-chip" style="background:var(--false);">false</span></td><td>Not accurate</td><td>2,258</td><td>249</td></tr>
+      <tr><td><span class="label-chip" style="background:var(--pants);">pants-fire</span></td><td>Ridiculous lie</td><td>955</td><td>92</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--half);">Real Examples from the Dataset</h3>
+
+    <div class="example-box" style="border-color:var(--true);">
+      <span class="label-chip" style="background:var(--true);">true</span>
+      <div class="stmt">"Says Marco Rubio knows full well I voted for his amendment to increase military spending to $697 billion."</div>
+    </div>
+
+    <div class="example-box" style="border-color:var(--half);">
+      <span class="label-chip" style="background:var(--half);">half-true</span>
+      <div class="stmt">"There are 60,000 fewer jobs today in this state than we had in 2008."</div>
+    </div>
+
+    <div class="example-box" style="border-color:var(--false);">
+      <span class="label-chip" style="background:var(--false);">false</span>
+      <div class="stmt">"All the talk about socialism during the campaign made young people more interested in it by Election Day."</div>
+    </div>
+
+    <div class="example-box" style="border-color:var(--pants);">
+      <span class="label-chip" style="background:var(--pants);">pants-fire</span>
+      <div class="stmt">"Says Larry Taylor gave in-state tuition to illegal immigrants."</div>
+    </div>
+
+    <div class="warning">
+      <strong>⚠️ Can YOU tell the difference?</strong> Look at those examples — even for humans, distinguishing "half-true" from "barely-true" or "mostly-true" from "true" is extremely subjective. The boundaries between adjacent categories are fuzzy, which is a fundamental challenge for any classifier.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ THE APPROACH ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D6EAF8;">🔧</div>
+    <div>
+      <div class="section-title">The Approach — Text → Numbers → Predictions</div>
+      <div class="section-subtitle">TF-IDF for traditional models, Tokenizer + Embedding for CNN</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Machines can't read text — they need numbers. The notebook uses two different strategies to convert statements into numerical features:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--accent)">Method</th><th style="background:var(--accent)">Used By</th><th style="background:var(--accent)">How It Works</th><th style="background:var(--accent)">Output</th></tr>
+      <tr>
+        <td><strong>TF-IDF</strong></td>
+        <td>SVM, Random Forest, XGBoost, MLP</td>
+        <td>Counts how important each word is across all documents. Rare words get higher scores.</td>
+        <td>5,000-feature vector per statement</td>
+      </tr>
+      <tr>
+        <td><strong>Tokenizer + Embedding</strong></td>
+        <td>CNN</td>
+        <td>Converts words to integer IDs, then learns 128-dimensional meaning vectors during training.</td>
+        <td>100-length sequence → 128-dim embeddings</td>
+      </tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> <strong>TF-IDF</strong> is like making a "word importance scorecard" for each statement — "the word 'trillion' appears rarely in all statements but a lot in THIS one, so it's important here." <strong>Embeddings</strong> are like giving each word a personality profile (128 traits) so the CNN can understand meaning, not just frequency.
+    </div>
+
+    <div class="info-box">
+      <strong>📌 Key Setting:</strong> TF-IDF uses <strong>unigrams + bigrams</strong> (single words and two-word phrases like "tax cuts") with a vocabulary of 5,000 features. The CNN uses max 5,000 words and pads/truncates all statements to exactly 100 tokens.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ THE 5 MODELS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🤖</div>
+    <div>
+      <div class="section-title">The 5 Models — From Traditional ML to Deep Learning</div>
+      <div class="section-subtitle">SVM, Random Forest, XGBoost, MLP, CNN</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <table class="nice-table">
+      <tr><th style="background:var(--news)">Model</th><th style="background:var(--news)">Type</th><th style="background:var(--news)">How It Works on Text</th></tr>
+      <tr><td><strong>SVM (Linear)</strong></td><td>Traditional ML</td><td>Finds the best hyperplane to separate 6 classes in the 5,000-dim TF-IDF space</td></tr>
+      <tr><td><strong>Random Forest</strong></td><td>Traditional ML (Ensemble)</td><td>100 decision trees vote on which truth level based on word importance patterns</td></tr>
+      <tr><td><strong>XGBoost</strong></td><td>Traditional ML (Boosting)</td><td>Sequentially builds trees that fix previous mistakes on the TF-IDF features</td></tr>
+      <tr><td><strong>Neural Network (MLP)</strong></td><td>Deep Learning</td><td>Two hidden layers (100, 50 neurons) learn nonlinear patterns in TF-IDF features</td></tr>
+      <tr><td><strong>CNN</strong></td><td>Deep Learning</td><td>1D convolutions slide across the word sequence to detect local phrase patterns</td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>📌 The CNN Architecture:</strong> Embedding(128) → Conv1D(64) → Pool → Conv1D(64) → Pool → Conv1D(64) → Flatten → Dense(64) → Dropout(0.5) → Softmax(6). It looks for local patterns like suspicious phrases, hedging language, or extreme claims.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ THE RESULTS ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFEAA7;">📉</div>
+    <div>
+      <div class="section-title">The Results — All Models Struggle</div>
+      <div class="section-subtitle">Best: 25.6% — only 9 points above random guessing (16.7%)</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="bar-visual">
+      <div class="bar-row">
+        <div class="bar-label" style="color:#E67E22;">XGBoost 🥇</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:25.6%;background:#E67E22;">25.6%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--true);">Random Forest</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:24.8%;background:var(--true);">24.8%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--accent);">SVM (Linear)</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:23.0%;background:var(--accent);">23.0%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--half);">Neural Net</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:22.7%;background:var(--half);">22.7%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--pants);">CNN</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:21.4%;background:var(--pants);">21.4%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:#B2BEC3;">Random Guess</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:16.7%;background:#B2BEC3;">16.7%</div>
+        </div>
+      </div>
+    </div>
+
+    <p>The entire spread from worst to best is only <strong>4.2 percentage points</strong>. All models cluster around 21–26%, barely above the 16.7% random baseline for 6 classes.</p>
+
+    <div class="warning">
+      <strong>⚠️ CNN Overfitting Alert:</strong> The CNN's training accuracy climbed from 20% to 86% over 10 epochs — but validation accuracy never passed 25% and actually DECREASED after epoch 1. This is extreme overfitting: the CNN memorized the training statements word-for-word without learning generalizable patterns about truthfulness.
+    </div>
+
+    <h3 class="sub" style="color:var(--false);">Per-Class Performance (XGBoost — best model)</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--news)">Class</th><th style="background:var(--news)">Precision</th><th style="background:var(--news)">Recall</th><th style="background:var(--news)">F1</th></tr>
+      <tr><td><span class="label-chip" style="background:var(--false);">false</span></td><td>0.28</td><td>0.40</td><td>0.33</td></tr>
+      <tr><td><span class="label-chip" style="background:#2ECC71;">mostly-true</span></td><td>0.26</td><td>0.31</td><td>0.29</td></tr>
+      <tr><td><span class="label-chip" style="background:var(--half);">half-true</span></td><td>0.25</td><td>0.27</td><td>0.26</td></tr>
+      <tr><td><span class="label-chip" style="background:var(--true);">true</span></td><td>0.22</td><td>0.17</td><td>0.19</td></tr>
+      <tr><td><span class="label-chip" style="background:#E67E22;">barely-true</span></td><td>0.22</td><td>0.16</td><td>0.19</td></tr>
+      <tr><td><span class="label-chip" style="background:var(--pants);">pants-fire</span></td><td>0.26</td><td>0.10</td><td>0.14</td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>📌 Notice:</strong> "pants-fire" has the worst recall (10%) — out of 92 test cases, the model only catches ~9 of them. This makes sense: the most outrageous lies aren't necessarily linguistically different from regular false statements.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ WHY SO HARD ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFEBEE;">🧩</div>
+    <div>
+      <div class="section-title">Why Is Fake News Detection SO Hard?</div>
+      <div class="section-subtitle">The most important lesson in this entire notebook</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="analogy">
+      <strong>🏫 The Core Insight:</strong> In image classification, a cat LOOKS like a cat — the pixels contain the answer. But in fake news detection, <strong>the text alone doesn't contain enough information to determine truth</strong>. "The unemployment rate is 5%" looks identical whether it's true or false — you need external knowledge to verify it.
+    </div>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--false)">Why It's Hard</th><th style="background:var(--false)">Explanation</th><th style="background:var(--false)">Example</th></tr>
+      <tr>
+        <td><strong>Truth Requires External Knowledge</strong></td>
+        <td>The model only sees the statement text — it can't Google the facts</td>
+        <td>"GDP grew 3.2% last quarter" — is that true? You need to look it up!</td>
+      </tr>
+      <tr>
+        <td><strong>6 Fuzzy Categories</strong></td>
+        <td>The boundary between "half-true" and "barely-true" is extremely subjective</td>
+        <td>Even human fact-checkers might disagree on borderline cases</td>
+      </tr>
+      <tr>
+        <td><strong>Same Language, Different Truth</strong></td>
+        <td>True and false statements use the same words, grammar, and style</td>
+        <td>Politicians are trained to sound convincing regardless of accuracy</td>
+      </tr>
+      <tr>
+        <td><strong>Small Dataset for NLP</strong></td>
+        <td>11,524 training samples is tiny for text classification</td>
+        <td>Modern NLP models (BERT, GPT) train on billions of words</td>
+      </tr>
+      <tr>
+        <td><strong>Only Text Features Used</strong></td>
+        <td>The dataset includes speaker, party, context — but only text was used</td>
+        <td>Knowing WHO said it and WHEN might help a lot</td>
+      </tr>
+    </table>
+
+    <div class="key-point">
+      <strong>💡 The Fundamental Limitation:</strong> Fake news detection from text alone is essentially asking: "Does this sentence SOUND true?" But lies are designed to sound true! Unlike images (where visual features ARE the answer), text truthfulness depends on facts OUTSIDE the text itself.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ WHAT COULD IMPROVE IT ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D5F5E3;">🚀</div>
+    <div>
+      <div class="section-title">What Could Improve Results?</div>
+      <div class="section-subtitle">Ideas for pushing beyond 25% accuracy</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <table class="nice-table">
+      <tr><th style="background:var(--true)">Improvement</th><th style="background:var(--true)">Expected Impact</th><th style="background:var(--true)">Why</th></tr>
+      <tr><td><strong>Use All Features</strong> (speaker, party, context)</td><td>🟢 High</td><td>Knowing WHO said it and their track record helps a LOT</td></tr>
+      <tr><td><strong>Reduce to 2 Classes</strong> (true vs false)</td><td>🟢 High</td><td>Collapsing 6 fuzzy categories to 2 clear ones is much more tractable</td></tr>
+      <tr><td><strong>Pre-trained Language Models</strong> (BERT, RoBERTa)</td><td>🟢 High</td><td>Transfer learning for text — same idea as MobileNetV2 for images</td></tr>
+      <tr><td><strong>More Training Data</strong></td><td>🟡 Medium</td><td>11K samples is small for NLP; more data always helps</td></tr>
+      <tr><td><strong>External Knowledge Retrieval</strong></td><td>🟡 Medium</td><td>Let the model search for facts to verify claims</td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>📌 State of the Art:</strong> Published research on the LIAR dataset typically achieves 27–30% accuracy with text-only features, and up to ~40% when using ALL metadata features. This is a well-known benchmark — so 25.6% is actually a reasonable result for this approach!
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ SUMMARY ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div>
+      <div class="section-title">Summary — What You Learned!</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #1 — Not All Problems Are Equal.</strong> Dogs vs Cats reached 93.6%. Pet breeds reached 77.8%. Fake news detection maxed at 25.6%. The difficulty depends on whether the features you have CONTAIN the answer — pixels contain animal identity, but words alone don't contain truth.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #2 — Fancier Models Don't Always Win.</strong> XGBoost (traditional ML) beat the CNN (deep learning). On small text datasets without pre-trained embeddings, tree-based methods often outperform neural networks. More complexity ≠ better results.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #3 — Know Your Baseline.</strong> Random guessing gives 16.7% on 6 classes. The best model at 25.6% is only 9 points above random. Always compare against the baseline — a model that looks "bad" might still be the best possible given the data.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #4 — The CNN Overfitting Trap.</strong> Training accuracy reached 86% while test accuracy was 21%. This is a textbook example of memorization vs learning. The CNN memorized specific training statements without understanding truthfulness.
+    </div>
+
+    <div style="background:linear-gradient(135deg,#1A1A2E,#0F3460);border-radius:14px;padding:20px;margin-top:16px;color:#fff;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">💡 Why This Project Matters:</h4>
+      <p style="opacity:.9;font-size:.9rem;">
+      This is the most important notebook in your course because it teaches you what the others DON'T: <strong>ML has limits.</strong> Not every problem can be solved by throwing models at it. Understanding WHY a problem is hard — and what additional data or approaches might help — is the hallmark of a real data scientist, not just someone who can call model.fit().
+      </p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>

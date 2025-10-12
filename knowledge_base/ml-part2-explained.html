@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Learning Part 2 — Explained Simply!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F0FF;
+    --card: #FFFFFF;
+    --accent1: #6C5CE7;
+    --accent2: #00B894;
+    --accent3: #E17055;
+    --accent4: #0984E3;
+    --accent5: #FDCB6E;
+    --text: #2D3436;
+    --text-light: #636E72;
+    --shadow: 0 4px 24px rgba(108,92,231,0.08);
+    --radius: 18px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #6C5CE7 0%, #a29bfe 50%, #fd79a8 100%);
+    padding: 80px 24px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='20' cy='20' r='3'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero h1 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: #fff;
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    color: rgba(255,255,255,0.88);
+    font-size: 1.15rem;
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .container { max-width: 880px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  .section {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 28px;
+    overflow: hidden;
+    border: 1px solid rgba(108,92,231,0.06);
+    animation: fadeUp .5s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    padding: 22px 26px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .2s;
+  }
+  .section-header:hover { background: rgba(108,92,231,0.02); }
+
+  .section-icon {
+    width: 46px; height: 46px;
+    border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  .section-subtitle {
+    font-size: .83rem;
+    color: var(--text-light);
+    margin-top: 2px;
+  }
+  .toggle-arrow {
+    margin-left: auto;
+    font-size: 1.1rem;
+    transition: transform .3s;
+    color: var(--text-light);
+  }
+  .section.open .toggle-arrow { transform: rotate(180deg); }
+
+  .section-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .45s ease;
+  }
+  .section.open .section-body { max-height: 12000px; }
+  .section-content { padding: 0 26px 26px; }
+
+  .analogy {
+    background: linear-gradient(135deg, #FFF3E0, #FFF8E1);
+    border-left: 4px solid var(--accent3);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin: 14px 0;
+    font-size: .93rem;
+  }
+  .analogy strong { color: var(--accent3); }
+
+  .key-point {
+    background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+    border-left: 4px solid var(--accent2);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin: 14px 0;
+  }
+  .key-point strong { color: #27ae60; }
+
+  .warning {
+    background: linear-gradient(135deg, #FFEBEE, #FCE4EC);
+    border-left: 4px solid #e74c3c;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin: 14px 0;
+  }
+  .warning strong { color: #e74c3c; }
+
+  .info-box {
+    background: linear-gradient(135deg, #E3F2FD, #E8EAF6);
+    border-left: 4px solid var(--accent4);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin: 14px 0;
+  }
+  .info-box strong { color: var(--accent4); }
+
+  .step {
+    display: flex;
+    gap: 12px;
+    margin: 12px 0;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: .82rem;
+    color: #fff;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .nice-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 14px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: .88rem;
+  }
+  .nice-table th {
+    background: var(--accent1);
+    color: #fff;
+    padding: 10px 14px;
+    text-align: left;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 500;
+  }
+  .nice-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .nice-table tr:nth-child(even) td { background: #fafafa; }
+
+  .vs-box {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 12px;
+    margin: 16px 0;
+    align-items: center;
+  }
+  .vs-card {
+    border-radius: 14px;
+    padding: 18px;
+    text-align: center;
+  }
+  .vs-card h4 { font-family: 'Fredoka', sans-serif; margin-bottom: 6px; }
+  .vs-label { font-family: 'Fredoka', sans-serif; font-size: 1.5rem; color: var(--accent1); }
+
+  .flow {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 16px 0;
+    justify-content: center;
+  }
+  .flow-box {
+    background: linear-gradient(135deg, #6C5CE7, #a29bfe);
+    color: #fff;
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: .8rem;
+    font-weight: 500;
+    text-align: center;
+    min-width: 90px;
+  }
+  .flow-arrow { font-size: 1.1rem; color: var(--accent1); }
+
+  p + p { margin-top: 11px; }
+  h3.sub { font-family: 'Fredoka', sans-serif; margin: 18px 0 10px; font-size: 1.05rem; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .summary-card {
+    border-radius: 14px;
+    padding: 18px;
+    color: #fff;
+    text-align: center;
+  }
+  .summary-card h4 { font-family: 'Fredoka', sans-serif; font-size: 1.05rem; margin-bottom: 6px; }
+  .summary-card p { font-size: .85rem; opacity: .92; }
+
+  @media(max-width: 600px) {
+    .vs-box { grid-template-columns: 1fr; }
+    .vs-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🧠 Machine Learning Part 2</h1>
+  <p>Regression Deep Dive, Metrics, Cross-Validation, Bias-Variance, Regularization & more — all explained like you're in school. Click each section!</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ BIG PICTURE ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE7F6;">🗺️</div>
+    <div>
+      <div class="section-title">The Big Picture — What's in This Notebook?</div>
+      <div class="section-subtitle">Part 2 goes much deeper than Part 1</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>If Part 1 was "intro to cooking," Part 2 is the <strong>full cooking masterclass</strong>. It takes regression (predicting numbers) and goes really deep — showing you multiple datasets, multiple techniques, and how to diagnose problems.</p>
+
+    <div class="flow">
+      <div class="flow-box">📈 Linear<br>Regression</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">📐 Polynomial<br>Regression</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">📊 Metrics<br>Deep Dive</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">🔄 Cross-<br>Validation</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">⚖️ Bias vs<br>Variance</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">🛡️ Regulariz-<br>ation</div>
+    </div>
+
+    <p>It also covers <strong>decision trees</strong>, <strong>classification</strong> (wine quality), and a <strong>company profit prediction</strong> project. Here's each piece explained simply.</p>
+  </div></div>
+</div>
+
+<!-- ═══════════ LINEAR REGRESSION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8EAF6;">📈</div>
+    <div>
+      <div class="section-title">Part 1: Linear Regression — Predicting CO2 Emissions</div>
+      <div class="section-subtitle">Simple → Multiple features, using real car data</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>The notebook uses a <strong>real dataset of 1,067 cars</strong> to predict how much CO2 each car emits based on features like engine size, cylinders, and fuel consumption.</p>
+
+    <div class="analogy">
+      <strong>🚗 School Analogy:</strong> Imagine you're trying to guess how much pollution a car makes. You start by looking at just ONE thing (engine size). Then you look at MANY things at once (engine size + cylinders + fuel consumption). Using more clues gives better guesses!
+    </div>
+
+    <h3 class="sub" style="color: var(--accent1);">Simple vs. Multiple Linear Regression</h3>
+
+    <div class="vs-box">
+      <div class="vs-card" style="background: #F3E5F5;">
+        <h4>Simple (1 feature)</h4>
+        <p>CO2 = a + b × EngineSize</p>
+        <p style="margin-top:6px;">Like guessing your exam score using <em>only</em> how many hours you studied.</p>
+      </div>
+      <div class="vs-label">VS</div>
+      <div class="vs-card" style="background: #E8F5E9;">
+        <h4>Multiple (6 features)</h4>
+        <p>CO2 = a + b₁×Engine + b₂×Cylinders + b₃×FuelCity + ...</p>
+        <p style="margin-top:6px;">Like guessing your score using hours studied + sleep + breakfast + class attendance.</p>
+      </div>
+    </div>
+
+    <div class="key-point">
+      <strong>💡 Result:</strong> The single-feature model got ~78% accuracy (R²). The multi-feature model jumped to <strong>~90% (R² = 0.90)</strong>. More relevant features = better predictions!
+    </div>
+
+    <h3 class="sub" style="color: var(--accent1);">The Model Equation</h3>
+    <p>The final equation is: <strong>CO2 = 262.57 + 8.96×EngineSize + 7.24×Cylinders − 13.00×FuelCity − 5.47×FuelHwy + 21.87×FuelComb − 4.03×CombMPG</strong></p>
+
+    <div class="warning">
+      <strong>⚠️ Wait, why is FuelCity NEGATIVE?</strong> You'd expect more city fuel use = more CO2, right? This is because of <strong>multicollinearity</strong> — the fuel features are so similar to each other (city, highway, and combined fuel use are almost identical numbers) that the model gets confused about who deserves the credit. It's like three students submitting the same group project individually — the teacher can't tell who did the work, so the grades get weird.
+    </div>
+
+    <h3 class="sub" style="color: var(--accent1);">The Assumptions of Linear Regression</h3>
+    <p>The notebook teaches you the "rules" that linear regression needs to follow to work well. Think of them as the fine print:</p>
+
+    <table class="nice-table">
+      <tr><th>Assumption</th><th>In Simple Words</th><th>What Breaks It</th></tr>
+      <tr><td><strong>Linearity</strong></td><td>The relationship is a straight line, not a curve</td><td>Exponential growth, curves</td></tr>
+      <tr><td><strong>Homoscedasticity</strong></td><td>Errors are the same size everywhere (not a funnel shape)</td><td>Errors getting bigger for big predictions</td></tr>
+      <tr><td><strong>Normal Residuals</strong></td><td>Mistakes follow a bell curve</td><td>Lopsided error distribution</td></tr>
+      <tr><td><strong>No Multicollinearity</strong></td><td>Features aren't just copies of each other</td><td>Height in cm AND height in inches</td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>📏 School Analogy:</strong> These assumptions are like "ideal lab conditions" in science class. Real life never perfectly matches them, but the closer you get, the more reliable your results.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ COMPREHENSIVE ANALYSIS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E0F7FA;">🔬</div>
+    <div>
+      <div class="section-title">Part 2: Comprehensive Analysis — The Full Pipeline</div>
+      <div class="section-subtitle">EDA → VIF → Model comparison → Diagnostics</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>The notebook then does a <strong>full professional analysis</strong> of the same CO2 data, following every step a real data scientist would:</p>
+
+    <div class="flow">
+      <div class="flow-box">🔍 EDA<br>(Explore)</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">⚠️ VIF Check<br>(Multicollinearity)</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">✂️ Scale &<br>Split</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">🏋️ Train 4<br>Models</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">📊 Compare<br>& Diagnose</div>
+    </div>
+
+    <h3 class="sub" style="color: var(--accent4);">EDA (Exploratory Data Analysis)</h3>
+    <div class="analogy">
+      <strong>🔍 School Analogy:</strong> Before writing an essay, you read the book first! EDA is "reading the data" — looking at its shape, patterns, and potential problems before building any model.
+    </div>
+    <p>Key findings: all features strongly correlate with CO2 (good!), no missing values, and pickup trucks/SUVs emit the most CO2.</p>
+
+    <h3 class="sub" style="color: var(--accent4);">VIF (Variance Inflation Factor)</h3>
+    <p>This checks if features are too similar to each other. The results were alarming:</p>
+
+    <table class="nice-table">
+      <tr><th>Feature</th><th>VIF Score</th><th>Verdict</th></tr>
+      <tr><td>Fuel Combined</td><td>178,455</td><td>🚨 Extreme — basically a copy of other fuel features</td></tr>
+      <tr><td>Fuel City</td><td>71,487</td><td>🚨 Extreme</td></tr>
+      <tr><td>Fuel Highway</td><td>24,475</td><td>🚨 Extreme</td></tr>
+      <tr><td>Cylinders</td><td>94.7</td><td>⚠️ High</td></tr>
+      <tr><td>Combined MPG</td><td>6.5</td><td>✅ Acceptable (below 10)</td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>📝 School Analogy:</strong> VIF above 10 is bad. Imagine a teacher asking you to explain separately why you're good at "addition," "adding numbers," and "summing things" — they're all the same skill! The teacher can't grade them separately. That's multicollinearity.
+    </div>
+
+    <h3 class="sub" style="color: var(--accent4);">Model Shootout — 4 Models Compared</h3>
+    <p>The notebook trains four different models and compares them head-to-head:</p>
+
+    <table class="nice-table">
+      <tr><th>Model</th><th>What It Does</th><th>Result (R²)</th></tr>
+      <tr><td><strong>OLS (Plain Linear)</strong></td><td>Basic straight line — no tricks</td><td>~0.90</td></tr>
+      <tr><td><strong>Ridge</strong></td><td>Like OLS but adds a penalty to prevent any feature from getting too powerful</td><td>~0.90</td></tr>
+      <tr><td><strong>Lasso</strong></td><td>Like Ridge but can completely eliminate useless features</td><td>~0.90</td></tr>
+      <tr><td><strong>ElasticNet</strong></td><td>A mix of Ridge + Lasso</td><td>~0.90</td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>📌 Why are all scores similar?</strong> Because for this well-behaved dataset, regularization doesn't make a huge difference. But on messier data with more features, the difference can be dramatic. Think of regularization as a seatbelt — you don't notice it until you need it.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ POLYNOMIAL REGRESSION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFF3E0;">📐</div>
+    <div>
+      <div class="section-title">Part 3: Polynomial Regression — When Lines Aren't Enough</div>
+      <div class="section-subtitle">Bending the line into curves</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Sometimes the relationship between things isn't a straight line — it's a curve. Polynomial regression lets the model draw <strong>curves</strong> instead of just lines.</p>
+
+    <div class="analogy">
+      <strong>🏀 School Analogy:</strong> Imagine plotting how far a basketball goes vs. how hard you throw it. A gentle throw goes a little far. A medium throw goes pretty far. A super hard throw goes far AND high. That path is a CURVE (a parabola), not a straight line. A straight line would miss the whole shape!
+    </div>
+
+    <h3 class="sub" style="color: var(--accent3);">How It Works</h3>
+    <p>Instead of just using X (the feature), polynomial regression creates new features like X², X³, X⁴, etc. Then it fits a straight line through this <em>expanded</em> space — which looks like a curve in the original space.</p>
+
+    <table class="nice-table">
+      <tr><th>Degree</th><th>Equation Shape</th><th>Test R²</th><th>Verdict</th></tr>
+      <tr><td>1 (Line)</td><td>y = a + bx</td><td>0.572</td><td>🔴 Underfitting — too simple</td></tr>
+      <tr><td>2 (Parabola)</td><td>y = a + bx + cx²</td><td>0.946</td><td>🟢 Great fit!</td></tr>
+      <tr><td>3 (Cubic)</td><td>y = a + bx + cx² + dx³</td><td>0.998</td><td>🟢 Excellent!</td></tr>
+      <tr><td>5</td><td>Gets wiggly</td><td>0.998</td><td>⚠️ Starting to overfit</td></tr>
+      <tr><td>10</td><td>Very wiggly</td><td>0.998</td><td>🔴 Overfitting — memorizing noise</td></tr>
+    </table>
+
+    <div class="key-point">
+      <strong>💡 The Sweet Spot:</strong> Degree 2 or 3 is usually best. Higher degrees look great on training data but fail on new data because they memorize random noise instead of the real pattern.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ METRICS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">📊</div>
+    <div>
+      <div class="section-title">Part 4: Metrics Deep Dive — How Do We Grade a Model?</div>
+      <div class="section-subtitle">MSE, RMSE, MAE, R² explained with school analogies</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>You need a way to measure how good (or bad) your model is. There are several "grading systems":</p>
+
+    <table class="nice-table">
+      <tr><th>Metric</th><th>Formula Idea</th><th>School Analogy</th><th>When to Use</th></tr>
+      <tr>
+        <td><strong>MSE</strong><br>(Mean Squared Error)</td>
+        <td>Average of (mistake)²</td>
+        <td>Like squaring every wrong answer's distance from correct, then averaging. Big mistakes get PUNISHED hard.</td>
+        <td>When you really hate big errors</td>
+      </tr>
+      <tr>
+        <td><strong>RMSE</strong><br>(Root MSE)</td>
+        <td>√MSE</td>
+        <td>Same as MSE but in normal units (not squared). If RMSE = 5, the model is off by about 5 units on average.</td>
+        <td>Most common — easy to understand</td>
+      </tr>
+      <tr>
+        <td><strong>MAE</strong><br>(Mean Absolute Error)</td>
+        <td>Average of |mistake|</td>
+        <td>Simply: "How far off are you, on average?" Doesn't punish big errors extra.</td>
+        <td>When all errors matter equally</td>
+      </tr>
+      <tr>
+        <td><strong>R²</strong><br>(R-squared)</td>
+        <td>1 − (model errors / total variation)</td>
+        <td>Like a percentage grade: 0.90 = "you explained 90% of why prices vary." 1.0 = perfect. 0 = useless.</td>
+        <td>Quick overall grade</td>
+      </tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🎯 School Analogy — MSE vs MAE:</strong> Imagine 5 students guessed the teacher's age (actual: 40). Their guesses: 38, 39, 40, 41, 60.<br><br>
+      <strong>MAE</strong> = average of |−2, −1, 0, +1, +20| = <strong>4.8</strong> (treats all errors the same)<br>
+      <strong>MSE</strong> = average of (4, 1, 0, 1, 400) = <strong>81.2</strong> (that one wild guess of 60 DOMINATES the score!)<br><br>
+      MSE punishes the student who guessed 60 way more than MAE does. Use MSE when big errors are really bad; use MAE when they're not that different from small errors.
+    </div>
+
+    <div class="warning">
+      <strong>⚠️ Can R² be negative?</strong> Yes! If your model is so bad that it performs worse than just guessing the average every time, R² goes below zero. It's like scoring worse on a test than a student who wrote the same answer for every question.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ CROSS-VALIDATION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FCE4EC;">🔄</div>
+    <div>
+      <div class="section-title">Part 5: Cross-Validation — Don't Trust a Single Test</div>
+      <div class="section-subtitle">K-fold, Stratified, Time Series splits</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>A single train/test split might be lucky or unlucky. <strong>Cross-validation</strong> tests the model multiple times to get a reliable score.</p>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Imagine you want to know how good you are at math. Taking ONE test might not be fair — maybe that test had your best topics. So instead, you take 5 DIFFERENT tests, each covering different chapters, and average the scores. That's 5-fold cross-validation!
+    </div>
+
+    <h3 class="sub" style="color: #e84393;">How K-Fold Cross-Validation Works</h3>
+
+    <div style="background: #F5F5F5; border-radius: 12px; padding: 18px; margin: 14px 0; font-family: monospace; font-size: .85rem; line-height: 2;">
+      <strong>Round 1:</strong> [<span style="color:red">TEST</span>] [train] [train] [train] [train] → Score: 0.88<br>
+      <strong>Round 2:</strong> [train] [<span style="color:red">TEST</span>] [train] [train] [train] → Score: 0.91<br>
+      <strong>Round 3:</strong> [train] [train] [<span style="color:red">TEST</span>] [train] [train] → Score: 0.87<br>
+      <strong>Round 4:</strong> [train] [train] [train] [<span style="color:red">TEST</span>] [train] → Score: 0.92<br>
+      <strong>Round 5:</strong> [train] [train] [train] [train] [<span style="color:red">TEST</span>] → Score: 0.89<br>
+      <strong>Final Score:</strong> 0.89 ± 0.02 (much more trustworthy!)
+    </div>
+
+    <p>The notebook also mentions special types:</p>
+    <table class="nice-table">
+      <tr><th>Type</th><th>When to Use</th><th>School Analogy</th></tr>
+      <tr><td><strong>K-Fold</strong></td><td>General purpose</td><td>5 tests, rotating which chapter is the exam</td></tr>
+      <tr><td><strong>Stratified K-Fold</strong></td><td>When classes are imbalanced</td><td>Making sure each test has the same mix of easy/hard questions</td></tr>
+      <tr><td><strong>Time Series Split</strong></td><td>For data ordered by time</td><td>Always testing on FUTURE dates, never past ones</td></tr>
+    </table>
+  </div></div>
+</div>
+
+<!-- ═══════════ BIAS-VARIANCE ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFF9C4;">⚖️</div>
+    <div>
+      <div class="section-title">Part 6: Bias-Variance Tradeoff — The Core Dilemma of ML</div>
+      <div class="section-subtitle">The most important concept in this notebook</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>This is the <strong>single most important idea</strong> in all of machine learning. The notebook demonstrates it beautifully with math and visualizations.</p>
+
+    <div class="analogy">
+      <strong>🎯 School Analogy — The Archery Metaphor:</strong><br><br>
+      Imagine throwing darts at a target. <strong>Bias</strong> is how far your AVERAGE throw is from the bullseye. <strong>Variance</strong> is how spread out your throws are from each other.<br><br>
+      <strong>High Bias, Low Variance</strong> = All your darts land in the same spot, but it's the WRONG spot (consistently wrong)<br>
+      <strong>Low Bias, High Variance</strong> = Your average is near the bullseye, but individual darts are all over the place (inconsistently right)<br>
+      <strong>Low Bias, Low Variance</strong> = All darts near the bullseye (the goal!)
+    </div>
+
+    <h3 class="sub" style="color: #f39c12;">The Key Formula</h3>
+    <div class="info-box">
+      <strong>Total Error = Bias² + Variance + Irreducible Error</strong><br><br>
+      You can't reduce all three at once. Making a model more complex reduces bias but increases variance (and vice versa). The "irreducible error" is random noise you can never eliminate.
+    </div>
+
+    <h3 class="sub" style="color: #f39c12;">The Notebook's Results</h3>
+    <table class="nice-table">
+      <tr><th>Model</th><th>Bias²</th><th>Variance</th><th>Total Error</th><th>Diagnosis</th></tr>
+      <tr><td>Degree 1 (Linear)</td><td>0.378 (HIGH)</td><td>0.011 (low)</td><td>0.478</td><td>🔴 Underfitting — too simple, can't learn the pattern</td></tr>
+      <tr><td>Degree 3 (Cubic)</td><td>0.000 (low)</td><td>0.004 (low)</td><td>0.094</td><td>🟢 Just right! Low bias AND low variance</td></tr>
+      <tr><td>Degree 9 (Complex)</td><td>0.000 (low)</td><td>0.012 (higher)</td><td>0.102</td><td>⚠️ Overfitting — variance starting to creep up</td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🧸 Goldilocks Again:</strong> Degree 1 = too cold (underfits). Degree 9 = too hot (overfits). Degree 3 = just right!
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ REGULARIZATION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8EAF6;">🛡️</div>
+    <div>
+      <div class="section-title">Part 7: Regularization — Taming the Model</div>
+      <div class="section-subtitle">Ridge, Lasso, ElasticNet explained</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Regularization is a technique to <strong>prevent overfitting</strong> by adding a penalty for having big, wild coefficients. It forces the model to be simpler and more well-behaved.</p>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Imagine a student writing an essay. Without rules, they might write 50 pages of rambling nonsense to "cover everything" (overfitting). Regularization is like the teacher saying: "There's a word limit. Every extra word costs you points." This forces the student to focus on what truly matters.
+    </div>
+
+    <h3 class="sub" style="color: var(--accent1);">The Three Musketeers of Regularization</h3>
+
+    <table class="nice-table">
+      <tr><th>Method</th><th>Penalty Type</th><th>What It Does</th><th>School Analogy</th></tr>
+      <tr>
+        <td><strong>Ridge (L2)</strong></td>
+        <td>Penalizes big coefficients (squared)</td>
+        <td>Shrinks all coefficients toward zero but KEEPS all features</td>
+        <td>Teacher says "keep all essay paragraphs, but make each shorter"</td>
+      </tr>
+      <tr>
+        <td><strong>Lasso (L1)</strong></td>
+        <td>Penalizes big coefficients (absolute)</td>
+        <td>Can set some coefficients to EXACTLY zero — removes useless features!</td>
+        <td>Teacher says "delete any paragraphs that don't add value"</td>
+      </tr>
+      <tr>
+        <td><strong>ElasticNet</strong></td>
+        <td>Mix of L1 + L2</td>
+        <td>Best of both worlds — shrinks AND can eliminate</td>
+        <td>Teacher says "shorten some paragraphs AND delete the bad ones"</td>
+      </tr>
+    </table>
+
+    <h3 class="sub" style="color: var(--accent1);">The Alpha Parameter (α)</h3>
+    <p>Alpha controls <strong>how strict</strong> the penalty is. The notebook uses <strong>GridSearchCV</strong> to automatically find the best alpha value by trying many options and picking the winner.</p>
+
+    <div class="analogy">
+      <strong>🎛️ Think of alpha like a volume knob:</strong><br>
+      α = 0 → No regularization (same as plain linear regression)<br>
+      α = small → Gentle regularization (light touch)<br>
+      α = large → Strong regularization (heavy-handed — model becomes very simple)
+    </div>
+
+    <div class="key-point">
+      <strong>💡 Key Insight from the Notebook:</strong> Lasso performed "automatic feature selection" — it set some coefficients to exactly zero, essentially saying "this feature doesn't matter." Ridge kept all features but made them smaller. For this CO2 dataset, the sweet spot was usually around polynomial degree 2-3 with regularization.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ DECISION TREES & CLASSIFICATION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E0F2F1;">🌳</div>
+    <div>
+      <div class="section-title">Part 8: Decision Trees & Classification</div>
+      <div class="section-subtitle">Iris flowers + Wine quality prediction</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>The notebook switches from <strong>regression</strong> (predicting a number) to <strong>classification</strong> (predicting a category). It uses two datasets:</p>
+
+    <h3 class="sub" style="color: var(--accent2);">Decision Trees on Iris Dataset</h3>
+
+    <div class="analogy">
+      <strong>🌺 School Analogy:</strong> A decision tree works like the game "20 Questions." You ask yes/no questions one at a time to narrow down the answer:<br><br>
+      "Is petal length > 2.45 cm?" → If NO → It's a <strong>Setosa</strong> (done!)<br>
+      "Is petal width > 1.75 cm?" → If YES → It's a <strong>Virginica</strong><br>
+      → If NO → It's a <strong>Versicolor</strong><br><br>
+      That's literally how the tree works! It splits the data using the most informative questions.
+    </div>
+
+    <p>The notebook trains a shallow tree (max depth = 2) on the Iris dataset using only petal length and width. It achieves <strong>96% accuracy</strong> with just 2 questions!</p>
+
+    <p>The <strong>decision boundary plot</strong> shows a 2D map where different colored regions represent different flower predictions. You can see the clean splits the tree makes.</p>
+
+    <h3 class="sub" style="color: var(--accent2);">Wine Quality Classification</h3>
+    <p>The notebook also classifies <strong>1,599 wines</strong> into quality ratings (3-8) based on 11 chemical properties like alcohol content, acidity, and sulphates. This is a harder problem because the classes are <strong>imbalanced</strong> — most wines are rated 5 or 6, very few are rated 3 or 8.</p>
+
+    <div class="info-box">
+      <strong>📌 Classification Metrics:</strong> For classification, we use different metrics than regression — accuracy, precision, recall, F1-score, confusion matrix, and ROC curves. These measure things like "of all the wines I predicted as quality 7, how many actually were?" (precision) and "of all the actual quality 7 wines, how many did I catch?" (recall).
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ COMPANY PROFIT ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFF3E0;">💼</div>
+    <div>
+      <div class="section-title">Part 9: Company Profit Prediction</div>
+      <div class="section-subtitle">Real-world project with 1,000 companies</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>This section uses data from <strong>1,000 companies</strong> with features like R&D Spend, Administration costs, Marketing Spend, and State to predict <strong>Profit</strong>.</p>
+
+    <div class="analogy">
+      <strong>💰 School Analogy:</strong> Imagine you're a business student trying to guess a company's profit. You know how much they spend on research, marketing, and admin. You build a formula to predict profit, then test if polynomial curves do better than straight lines.
+    </div>
+
+    <p>Key steps include one-hot encoding the "State" column (converting text like "New York" into numbers), comparing Linear vs Polynomial regression at different degrees, and using Ridge regularization to prevent overfitting. The notebook finds that R&D Spend is by far the most important predictor of profit.</p>
+  </div></div>
+</div>
+
+<!-- ═══════════ QUIZ ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFECB3;">✅</div>
+    <div>
+      <div class="section-title">Part 10: Quiz — Test Your Understanding!</div>
+      <div class="section-subtitle">Key questions from the notebook's quiz section</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>The notebook ends with a quiz. Here are the questions and answers, explained simply:</p>
+
+    <div class="info-box">
+      <strong>Q: What's the relationship between MSE and RMSE?</strong><br>
+      A: RMSE = √MSE. It's like MSE but back in normal units. If you're predicting dollars, MSE is in "dollars squared" (weird), but RMSE is just in dollars (useful!).
+    </div>
+
+    <div class="info-box">
+      <strong>Q: Why can R² be negative?</strong><br>
+      A: When your model is worse than just guessing the average. Imagine a weather forecaster who's less accurate than just saying "today will be the same as the yearly average." That forecaster has a negative R².
+    </div>
+
+    <div class="info-box">
+      <strong>Q: What's the key difference between Ridge and Lasso?</strong><br>
+      A: Ridge makes all coefficients smaller. Lasso can make some coefficients exactly zero (deleting features). Lasso is like Marie Kondo: "Does this feature spark joy? No? Throw it out."
+    </div>
+
+    <div class="info-box">
+      <strong>Q: What does a funnel shape in a residual plot mean?</strong><br>
+      A: Heteroscedasticity — fancy word for "errors get bigger as predictions get bigger." Like a student who's accurate on easy questions but wildly wrong on hard ones.
+    </div>
+
+    <div class="info-box">
+      <strong>Q: Calculate MSE for predictions [3,5] and actual [4,4]:</strong><br>
+      A: MSE = [(3−4)² + (5−4)²] / 2 = [1 + 1] / 2 = <strong>1.0</strong>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ SUMMARY ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div>
+      <div class="section-title">Summary — Everything You Learned!</div>
+      <div class="section-subtitle">The complete cheat sheet</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="summary-grid">
+      <div class="summary-card" style="background: linear-gradient(135deg, #6C5CE7, #a29bfe);">
+        <h4>Linear Regression</h4>
+        <p>Draw a straight line through data. Simple, fast, interpretable — but limited to linear relationships.</p>
+      </div>
+      <div class="summary-card" style="background: linear-gradient(135deg, #E17055, #fab1a0);">
+        <h4>Polynomial Regression</h4>
+        <p>Bend the line into curves using X², X³, etc. More flexible but risk overfitting at high degrees.</p>
+      </div>
+      <div class="summary-card" style="background: linear-gradient(135deg, #00B894, #55efc4);">
+        <h4>Metrics</h4>
+        <p>MSE punishes big errors. RMSE is in real units. MAE is simpler. R² is your overall grade (0 to 1).</p>
+      </div>
+      <div class="summary-card" style="background: linear-gradient(135deg, #0984E3, #74b9ff);">
+        <h4>Cross-Validation</h4>
+        <p>Test 5 times with different splits. Average the scores. Don't trust a single test — it might be lucky.</p>
+      </div>
+      <div class="summary-card" style="background: linear-gradient(135deg, #FDCB6E, #ffeaa7);">
+        <h4 style="color: #2d3436;">Bias-Variance</h4>
+        <p style="color: #2d3436;">Simple models = high bias. Complex models = high variance. Find the sweet spot in the middle.</p>
+      </div>
+      <div class="summary-card" style="background: linear-gradient(135deg, #e74c3c, #fd79a8);">
+        <h4>Regularization</h4>
+        <p>Ridge shrinks, Lasso eliminates, ElasticNet does both. Controls overfitting with a penalty on complexity.</p>
+      </div>
+    </div>
+
+    <div class="key-point" style="margin-top: 20px;">
+      <strong>🎯 The #1 Takeaway from Part 2:</strong> Building a model is easy — building a GOOD model is hard. You need to check assumptions (residual plots), validate properly (cross-validation), understand the tradeoffs (bias vs. variance), and control complexity (regularization). This notebook gave you all the tools to do that!
+    </div>
+
+    <div style="background: #F5F5F5; border-radius: 14px; padding: 18px; margin-top: 16px;">
+      <h4 style="font-family: 'Fredoka'; margin-bottom: 8px;">8 Practical Tips from the Notebook:</h4>
+      <p>1. Always scale features before regularization<br>
+      2. Use train/validation/test splits to avoid overfitting<br>
+      3. Check residual plots to validate assumptions<br>
+      4. Start simple (linear), then increase complexity only if needed<br>
+      5. Use cross-validation for hyperparameter tuning<br>
+      6. Consider domain knowledge when interpreting coefficients<br>
+      7. Monitor both training AND validation performance<br>
+      8. Choose the right metric for your problem (MSE vs MAE)</p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+
+<script>
+function toggle(header) {
+  header.closest('.section').classList.toggle('open');
+}
+</script>
+</body>
+</html>

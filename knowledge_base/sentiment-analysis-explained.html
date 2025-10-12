@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentiment Analysis: TF-IDF vs BERT Explained!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F0F2F5;--card:#FFF;--tfidf:#E67E22;--bert:#8B5CF6;--ft:#EC4899;--rob:#3B82F6;--pos:#27AE60;--neg:#E74C3C;--text:#1E293B;--text2:#64748B;--shadow:0 4px 24px rgba(139,92,246,.08);--radius:18px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#E67E22 0%,#8B5CF6 50%,#EC4899 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23ffffff' fill-opacity='0.06'/%3E%3C/svg%3E")}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(1.8rem,5vw,3rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero p{color:rgba(255,255,255,.85);font-size:1.05rem;max-width:680px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.18rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text2);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text2)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:none}
+  .section-content{padding:0 26px 26px}
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid #E67E22;border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:#E67E22}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid #27AE60;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:#27AE60}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid #E74C3C;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:#E74C3C}
+  .info-box{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-left:4px solid var(--rob);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:var(--rob)}
+  .purple-box{background:linear-gradient(135deg,#F3E8FF,#EDE9FE);border-left:4px solid var(--bert);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .purple-box strong{color:var(--bert)}
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.86rem}
+  .nice-table th{padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500;color:#fff}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:nth-child(even) td{background:#fafafa}
+  .nice-table tr:last-child td{border-bottom:none}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+  .flow{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:16px 0;justify-content:center}
+  .flow-box{color:#fff;padding:8px 14px;border-radius:10px;font-size:.73rem;font-weight:500;text-align:center;min-width:70px}
+  .flow-arrow{font-size:1rem;color:#94A3B8}
+  .bar-visual{margin:14px 0}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .bar-label{width:165px;font-weight:600;font-size:.78rem;text-align:right;flex-shrink:0}
+  .bar-track{flex:1;height:30px;background:#f0f0f0;border-radius:8px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-weight:600;color:#fff;font-size:.8rem}
+  .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+  .vs-card{border-radius:14px;padding:18px;border:2px solid}
+  .vs-card h4{font-family:'Fredoka',sans-serif;font-size:.95rem;margin-bottom:6px}
+  .vs-card p{font-size:.83rem;color:var(--text2);line-height:1.5}
+  .nb-img{width:100%;max-width:100%;height:auto;display:block;border-radius:12px;margin:14px 0;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1px solid #e2e8f0}
+  @media(max-width:600px){.vs-grid{grid-template-columns:1fr}.bar-label{width:110px;font-size:.7rem}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>😊 Sentiment Analysis: TF-IDF vs BERT</h1>
+  <p>Three approaches to movie review sentiment : traditional ML, zero-shot transfer learning, and fine-tuned BERT, compared head-to-head on 50,000 IMDB reviews.</p>
+</div>
+
+<div class="container">
+
+<!-- BIG PICTURE -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#F3E8FF;">🗺️</div>
+    <div><div class="section-title">The Big Picture: What's This Project About?</div><div class="section-subtitle">3 approaches, 7 models, 1 question: can machines read emotions?</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>Given a movie review like <em>"This film was a masterpiece of storytelling"</em>, can a computer figure out it's positive? What about tricky cases like <em>"I wouldn't say this movie was bad… but I've seen better"</em>?</p>
+    <p>This project compares <strong>three generations of NLP</strong> on this exact task:</p>
+    <table class="nice-table">
+      <tr><th style="background:var(--tfidf);">Approach</th><th style="background:var(--tfidf);">Method</th><th style="background:var(--tfidf);">Training Needed</th><th style="background:var(--tfidf);">Best Accuracy</th></tr>
+      <tr><td><strong>A -> Traditional ML</strong></td><td>TF-IDF + LogReg, SVM, RF, XGBoost</td><td>25,000 labeled reviews</td><td><strong>89.5%</strong></td></tr>
+      <tr><td><strong>B -> Zero-Shot BERT</strong></td><td>DistilBERT (trained on SST-2, never saw IMDB)</td><td>NONE</td><td><strong>91.7%</strong></td></tr>
+      <tr><td><strong>C -> Fine-Tuned BERT</strong></td><td>DistilBERT fine-tuned on IMDB</td><td>25,000 labeled reviews</td><td><strong>93.3%</strong></td></tr>
+    </table>
+    <div class="analogy"><strong>🏫 School Analogy:</strong> Approach A is a student studying 25,000 flashcards from scratch. Approach B is a transfer student who already understands language from another school, scoring higher WITHOUT any flashcards. Approach C is that transfer student who ALSO studies the flashcards, the best score of all.</div>
+  </div></div>
+</div>
+
+<!-- BERT & TRANSFORMER PRIMER -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE9FE;">🧠</div>
+    <div><div class="section-title">What Is BERT? A Transformer Primer</div><div class="section-subtitle">The architecture that revolutionized NLP explained from scratch</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <h3 class="sub" style="color:var(--bert);">The Problem BERT Solves</h3>
+    <p>Before 2018, NLP models treated words mostly in isolation. TF-IDF literally counts word frequencies, "not good" becomes two separate features: "not" (negative-ish) and "good" (positive), confusing models. RNNs processed words sequentially but struggled with long documents.</p>
+    <p><strong>BERT</strong> (Bidirectional Encoder Representations from Transformers) changed everything by understanding words <em>in context</em>, processing entire sentences at once.</p>
+
+    <h3 class="sub" style="color:var(--bert);">The Transformer Architecture</h3>
+    <p>BERT is built on the <strong>Transformer</strong> (2017, "Attention Is All You Need"). The key innovation: <strong>self-attention</strong>- every word can directly attend to every other word in the sentence, regardless of distance.</p>
+    <div class="purple-box"><strong>🔑 Self-Attention in One Sentence:</strong> For each word, the model asks "which OTHER words in this sentence are relevant to understanding ME?" and computes weighted connections to all of them simultaneously.</div>
+    <p>For example, in <em>"The movie was not good, but the acting saved it"</em>:</p>
+    <table class="nice-table">
+      <tr><th style="background:var(--bert);">Word</th><th style="background:var(--bert);">Attends Strongly To</th><th style="background:var(--bert);">Why</th></tr>
+      <tr><td>"not"</td><td>"good"</td><td>Negation modifies meaning</td></tr>
+      <tr><td>"but"</td><td>"not", "saved"</td><td>Signals contrast/reversal</td></tr>
+      <tr><td>"it"</td><td>"movie"</td><td>Coreference resolution</td></tr>
+      <tr><td>"saved"</td><td>"acting", "movie"</td><td>What saved what</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--bert);">How Attention Actually Works : Q, K, V</h3>
+    <p>Each word gets three vectors: a <strong>Query</strong> ("what am I looking for?"), a <strong>Key</strong> ("what do I contain?"), and a <strong>Value</strong> ("what do I output?"). The attention score between two words is computed by multiplying the Query of one with the Key of the other. High score = strong attention.</p>
+    <div class="flow">
+      <div class="flow-box" style="background:var(--bert);">Each Word →<br>Q, K, V vectors</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--rob);">Q × K<sup>T</sup><br>= similarity scores</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--ft);">Softmax<br>→ attention weights</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--pos);">Weights × V<br>= context-aware output</div>
+    </div>
+    <p><strong>Multi-head attention</strong> runs this process 8–12 times in parallel (different "heads"), each learning different patterns: one head might focus on grammar, another on sentiment, another on negation.</p>
+
+    <h3 class="sub" style="color:var(--bert);">How BERT Was Pre-Trained</h3>
+    <p>BERT was pre-trained on <strong>3.3 billion words</strong> (English Wikipedia + BookCorpus) using two tasks:</p>
+    <div class="vs-grid">
+      <div class="vs-card" style="border-color:var(--bert);background:rgba(139,92,246,.03)">
+        <h4 style="color:var(--bert);">1. Masked Language Model</h4>
+        <p>Randomly hide 15% of words → predict them from context. "The cat [MASK] on the mat" → "sat". Forces understanding from BOTH directions (bidirectional).</p>
+      </div>
+      <div class="vs-card" style="border-color:var(--rob);background:rgba(59,130,246,.03)">
+        <h4 style="color:var(--rob);">2. Next Sentence Prediction</h4>
+        <p>Given two sentences, predict if B follows A. Teaches BERT to understand relationships between sentences.</p>
+      </div>
+    </div>
+
+    <h3 class="sub" style="color:var(--bert);">The BERT Family Used in This Project</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--bert);">Model</th><th style="background:var(--bert);">Params</th><th style="background:var(--bert);">Key Feature</th><th style="background:var(--bert);">Result</th></tr>
+      <tr><td><strong>DistilBERT</strong></td><td>66M</td><td>Distilled from BERT - 97% of performance, 2× faster, 40% smaller</td><td>91.7% (zero-shot), 93.3% (fine-tuned)</td></tr>
+      <tr><td><strong>RoBERTa-large</strong></td><td>355M</td><td>Better training: more data, no NSP task, dynamic masking</td><td>95.4% (zero-shot, 500 reviews)</td></tr>
+    </table>
+
+    <div class="analogy"><strong>🏫 School Analogy:</strong> BERT is a student who read every book in the library before class. For any new task (sentiment, translation, Q&A), they already understand language deeply. <strong>DistilBERT</strong> is that student's excellent study notes — 60% the size, nearly as smart, 2× faster. <strong>RoBERTa</strong> is a student who read even MORE books with a better study method.</div>
+
+    <div class="info-box"><strong>📌 TF-IDF vs BERT The Core Difference:</strong> TF-IDF sees text as a <em>bag of words</em> - counts and frequencies, no word order, no context. BERT sees text as a <em>structured sequence</em> - it understands "not good" is negative even though "good" alone is positive. This contextual understanding is why BERT dominates.</div>
+  </div></div>
+</div>
+
+<!-- DATASET -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFF3E0;">📊</div>
+    <div><div class="section-title">The Dataset : IMDB 50K Movie Reviews</div><div class="section-subtitle">Balanced, binary, and the gold standard for sentiment benchmarks</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <table class="nice-table">
+      <tr><th style="background:var(--tfidf);">Property</th><th style="background:var(--tfidf);">Value</th></tr>
+      <tr><td>Total reviews</td><td>50,000 (25K train + 25K test)</td></tr>
+      <tr><td>Classes</td><td>Positive / Negative (perfectly balanced: 12,500 each)</td></tr>
+      <tr><td>Average review length</td><td>~230 words</td></tr>
+      <tr><td>Source</td><td>HuggingFace <code>datasets</code> library</td></tr>
+    </table>
+
+    <img class="nb-img" src="../images/Dataset.png" alt="Class Distribution">
+
+    <p>EDA revealed balanced classes, similar length distributions for both sentiments, and distinctive word clouds, positive reviews feature "great", "love", "best" while negative reviews feature "bad", "worst", "boring".</p>
+  </div></div>
+</div>
+
+<!-- APPROACH A -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFF3E0;">📝</div>
+    <div><div class="section-title">Approach A: TF-IDF + Traditional ML</div><div class="section-subtitle">15K features, bigrams, 4 models, negation-aware preprocessing, VADER test</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <h3 class="sub" style="color:var(--tfidf);">Text Preprocessing</h3>
+    <div class="flow">
+      <div class="flow-box" style="background:var(--tfidf);">Raw Review</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#D35400;">Lowercase +<br>Remove HTML</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#E74C3C;">Letters Only</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#C0392B;">TF-IDF<br>15K features</div>
+    </div>
+    <p>Two variants tested: basic cleaning and <strong>negation-aware</strong> ("not good" → "not_good"). Negation gave a tiny +0.04% boost. <strong>VADER augmentation</strong> (adding rule-based sentiment scores) actually hurt by -0.5%, TF-IDF already captured sentiment more effectively.</p>
+
+    <h3 class="sub" style="color:var(--tfidf);">Results : 4 Models + 5-Fold CV</h3>
+
+    <img class="nb-img" src="../images/cross_validation.png" alt="Cross-Validation">
+
+    <div class="bar-visual">
+      <div class="bar-row"><div class="bar-label" style="color:var(--tfidf);">Logistic Regression</div><div class="bar-track"><div class="bar-fill" style="width:89.5%;background:var(--tfidf);">89.5%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:#D35400;">Linear SVM</div><div class="bar-track"><div class="bar-fill" style="width:88.5%;background:#D35400;">88.5%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--neg);">XGBoost</div><div class="bar-track"><div class="bar-fill" style="width:85.3%;background:var(--neg);">85.3%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:#C0392B;">Random Forest</div><div class="bar-track"><div class="bar-fill" style="width:85.1%;background:#C0392B;">85.1%</div></div></div>
+    </div>
+    <p>5-fold CV confirmed: LogReg 89.0% ± 0.3%, SVM 88.6% ± 0.5%. Feature importance showed top predictors: "excellent", "worst", "love", "boring".</p>
+    <div class="key-point"><strong>💡 Why Logistic Regression Won:</strong> For high-dimensional sparse data (15,000 TF-IDF features, mostly zeros), linear models excel. Tree-based models (RF, XGBoost) struggle to split effectively on thousands of sparse features.</div>
+  </div></div>
+</div>
+
+<!-- APPROACH B -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE9FE;">🎯</div>
+    <div><div class="section-title">Approach B: Zero-Shot BERT + RoBERTa</div><div class="section-subtitle">91.7% with ZERO training — transfer learning at its finest</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>DistilBERT fine-tuned on SST-2 (a different sentiment dataset) was applied directly to IMDB with no training. RoBERTa-large was also tested for comparison.</p>
+
+    <img class="nb-img" src="../images/RoBERTa_comparison.png" alt="RoBERTa Comparison">
+
+    <div class="bar-visual">
+      <div class="bar-row"><div class="bar-label" style="color:var(--rob);">RoBERTa-large</div><div class="bar-track"><div class="bar-fill" style="width:95.4%;background:var(--rob);">95.4%*</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--bert);">DistilBERT</div><div class="bar-track"><div class="bar-fill" style="width:91.7%;background:var(--bert);">91.7%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--tfidf);">Best TF-IDF</div><div class="bar-track"><div class="bar-fill" style="width:89.5%;background:var(--tfidf);">89.5%</div></div></div>
+    </div>
+    <p style="font-size:.8rem;color:var(--text2);">*RoBERTa tested on 500 reviews due to slower speed (355M params vs 66M)</p>
+    <div class="key-point"><strong>💡 The Stunning Result:</strong> BERT beats the best TF-IDF model by 2.2% despite ZERO IMDB training data. TF-IDF needed 25,000 labeled examples just to reach 89.5%. RoBERTa pushes this even further to 95.4% - the larger model's deeper language understanding pays off.</div>
+  </div></div>
+</div>
+
+<!-- APPROACH C -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FCE7F3;">🔥</div>
+    <div><div class="section-title">Approach C: Fine-Tuned DistilBERT : 93.3%</div><div class="section-subtitle">The best of both worlds: pre-training + task-specific fine-tuning</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>Fine-tuning the zero-shot DistilBERT on all 25,000 IMDB training reviews, updating its weights to specialize on this exact task. Same two-stage transfer learning from Parts 4–5.</p>
+
+    <img class="nb-img" src="../images/big_comparison.png" alt="Big Comparison">
+
+    <div class="bar-visual">
+      <div class="bar-row"><div class="bar-label" style="color:var(--ft);">Fine-Tuned BERT</div><div class="bar-track"><div class="bar-fill" style="width:93.3%;background:var(--ft);">93.3%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--bert);">Zero-Shot BERT</div><div class="bar-track"><div class="bar-fill" style="width:91.7%;background:var(--bert);">91.7%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--tfidf);">Best TF-IDF</div><div class="bar-track"><div class="bar-fill" style="width:89.5%;background:var(--tfidf);">89.5%</div></div></div>
+    </div>
+    <p>Fine-tuning gained <strong>+1.6%</strong> over zero-shot and <strong>+3.8%</strong> over the best TF-IDF model.</p>
+  </div></div>
+</div>
+
+<!-- DEEP ANALYSIS -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#DBEAFE;">🔬</div>
+    <div><div class="section-title">Deep Analysis - Learning Curves, Ensembles, Speed & Explainability</div><div class="section-subtitle">7 extra experiments that go far beyond basic accuracy</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <h3 class="sub" style="color:var(--rob);">Learning Curve - How Much Data Does Each Approach Need?</h3>
+
+    <img class="nb-img" src="../images/learning_curve.png" alt="Learning Curve">
+
+    <table class="nice-table">
+      <tr><th style="background:var(--rob);">Training Examples</th><th style="background:var(--rob);">TF-IDF + LogReg</th><th style="background:var(--rob);">BERT (Zero-Shot)</th></tr>
+      <tr><td>100</td><td>58.5%</td><td rowspan="6" style="vertical-align:middle;text-align:center;font-weight:700;color:var(--bert);background:rgba(139,92,246,.06);">91.7%<br><small>(needs zero<br>IMDB examples)</small></td></tr>
+      <tr><td>500</td><td>79.4%</td></tr>
+      <tr><td>1,000</td><td>83.0%</td></tr>
+      <tr><td>5,000</td><td>87.2%</td></tr>
+      <tr><td>10,000</td><td>88.3%</td></tr>
+      <tr><td>25,000</td><td>89.5%</td></tr>
+    </table>
+    <p>Even with ALL 25,000 training examples, TF-IDF never catches BERT's zero-shot performance.</p>
+
+    <h3 class="sub" style="color:var(--rob);">Ensemble - Combining the Best of Both</h3>
+
+    <img class="nb-img" src="../images/ensemble_comparison.png" alt="Ensemble Comparison">
+
+    <p>Soft-voting (averaging LogReg + BERT probabilities) reached <strong>92.4%</strong>better than either alone (+0.7% over BERT). They make <em>different</em> mistakes: BERT won 370 cases LogReg missed; LogReg won 223 cases BERT missed.</p>
+
+    <h3 class="sub" style="color:var(--rob);">Speed Benchmark</h3>
+    <table class="nice-table">
+      <tr><th style="background:#475569;">Model</th><th style="background:#475569;">Time per 100 Reviews</th><th style="background:#475569;">Speed</th></tr>
+      <tr><td>TF-IDF + LogReg</td><td>0.3 ms</td><td>⚡ <strong>1,573× faster</strong></td></tr>
+      <tr><td>BERT (CPU)</td><td>498 ms</td><td>🐢 Baseline</td></tr>
+      <tr><td>BERT (GPU T4)</td><td>~25 ms</td><td>🚀 20× faster than CPU</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--rob);">LIME Explainability</h3>
+    <p>LIME reveals which words drove BERT's predictions. For one negative review, BERT's top signals were: "not" (−0.34), "difficult" (−0.19), "uninspiring" (−0.02) — confirming BERT reads context correctly.</p>
+
+    <h3 class="sub" style="color:var(--rob);">Error Analysis</h3>
+    <p>Mixed-sentiment reviews are hardest — they make up 21.7% of data but 32.8% of errors (over-represented by 1.5×). Reviews praising some aspects while criticizing others confuse even BERT.</p>
+
+    <h3 class="sub" style="color:var(--rob);">Domain Generalization</h3>
+    <p>Both TF-IDF and BERT scored <strong>100%</strong> on 10 hand-crafted Amazon-style product reviews — sentiment understanding transfers across domains.</p>
+  </div></div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div><div class="section-title">Summary : All Results + Key Takeaways</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <div class="bar-visual">
+      <div class="bar-row"><div class="bar-label" style="color:var(--rob);">RoBERTa (zero-shot)</div><div class="bar-track"><div class="bar-fill" style="width:95.4%;background:var(--rob);">95.4%*</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--ft);">DistilBERT (fine-tuned)</div><div class="bar-track"><div class="bar-fill" style="width:93.3%;background:var(--ft);">93.3%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--pos);">Ensemble (LR+BERT)</div><div class="bar-track"><div class="bar-fill" style="width:92.4%;background:var(--pos);">92.4%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--bert);">DistilBERT (zero-shot)</div><div class="bar-track"><div class="bar-fill" style="width:91.7%;background:var(--bert);">91.7%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--tfidf);">TF-IDF + LogReg</div><div class="bar-track"><div class="bar-fill" style="width:89.5%;background:var(--tfidf);">89.5%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:#D35400;">TF-IDF + SVM</div><div class="bar-track"><div class="bar-fill" style="width:88.5%;background:#D35400;">88.5%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--neg);">TF-IDF + XGBoost</div><div class="bar-track"><div class="bar-fill" style="width:85.3%;background:var(--neg);">85.3%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:#C0392B;">TF-IDF + Random Forest</div><div class="bar-track"><div class="bar-fill" style="width:85.1%;background:#C0392B;">85.1%</div></div></div>
+    </div>
+    <p style="font-size:.78rem;color:var(--text2);">*RoBERTa tested on 500 reviews only</p>
+
+    <div class="key-point"><strong>🎯 Takeaway #1 — Transfer Learning Dominates NLP.</strong> Zero-shot BERT (91.7%) beats every TF-IDF model (89.5%) despite never seeing a single IMDB example. Pre-trained language understanding beats word counting.</div>
+    <div class="key-point"><strong>🎯 Takeaway #2 — Fine-Tuning Is Best of Both Worlds.</strong> Pre-trained BERT + task-specific training = 93.3%. Combining deep language understanding with domain knowledge.</div>
+    <div class="key-point"><strong>🎯 Takeaway #3 — Speed vs Accuracy Is Real.</strong> TF-IDF is 1,573× faster than BERT on CPU. The right choice depends on your production constraints.</div>
+    <div class="key-point"><strong>🎯 Takeaway #4 — Ensembles Beat Individuals.</strong> Averaging TF-IDF + BERT (92.4%) beats either alone — they fail on different review types.</div>
+    <div class="key-point"><strong>🎯 Takeaway #5 — Same Story as Computer Vision.</strong> Just as MobileNetV2 (ImageNet) crushed training from scratch for pet breeds (77.8% vs 13.7%), BERT crushed TF-IDF for sentiment. Transfer learning is THE dominant paradigm across all of ML.</div>
+
+    <div style="background:linear-gradient(135deg,#E67E22,#8B5CF6,#EC4899);border-radius:14px;padding:20px;margin-top:16px;color:#fff;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">🛠️ Extra Features in This Notebook:</h4>
+      <p style="opacity:.92;font-size:.87rem;">5-fold cross-validation, negation-aware preprocessing, VADER augmentation test, RoBERTa comparison, learning curve (100→25K), TF-IDF+BERT ensemble, CPU speed benchmarks, LIME explainability, richer error categorization (negation/mixed/long), domain generalization test (movie→Amazon), and an interactive Gradio demo for all 3 approaches. 🚀</p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>

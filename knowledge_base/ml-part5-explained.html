@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 5: Advanced CNNs & Computer Vision — Explained!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F0F4F8;--card:#FFF;--vgg:#6C5CE7;--resnet:#00B894;--transfer:#0984E3;--yolo:#E17055;--aug:#FDCB6E;--text:#2D3436;--text-light:#636E72;--shadow:0 4px 24px rgba(108,92,231,.08);--radius:18px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#0984E3 0%,#6C5CE7 40%,#E17055 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.06' stroke-width='1'%3E%3Crect x='10' y='10' width='40' height='40' rx='4'/%3E%3C/g%3E%3C/svg%3E")}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(1.8rem,5vw,3rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero p{color:rgba(255,255,255,.85);font-size:1.1rem;max-width:680px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.18rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text-light);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text-light)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:16000px}
+  .section-content{padding:0 26px 26px}
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid #E67E22;border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:#E67E22}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid #27AE60;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:#27AE60}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid #E74C3C;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:#E74C3C}
+  .info-box{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-left:4px solid var(--transfer);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:var(--transfer)}
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.86rem}
+  .nice-table th{padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500;color:#fff}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:nth-child(even) td{background:#fafafa}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+  .flow{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:16px 0;justify-content:center}
+  .flow-box{color:#fff;padding:8px 12px;border-radius:10px;font-size:.73rem;font-weight:500;text-align:center;min-width:70px}
+  .flow-arrow{font-size:1rem;color:#636E72}
+  .bar-visual{margin:14px 0}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .bar-label{width:120px;font-weight:600;font-size:.8rem;text-align:right;flex-shrink:0}
+  .bar-track{flex:1;height:28px;background:#f0f0f0;border-radius:8px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-weight:600;color:#fff;font-size:.78rem}
+  .task-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:16px 0}
+  .task-card{border-radius:12px;padding:16px;text-align:center;border:2px solid}
+  .task-card h4{font-family:'Fredoka',sans-serif;font-size:.95rem;margin-bottom:4px}
+  .task-card p{font-size:.8rem;color:var(--text-light)}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>👁️ Advanced CNNs & Computer Vision</h1>
+  <p>Part 5 takes you beyond basic CNNs — VGG, ResNet skip connections, transfer learning with fine-tuning, data augmentation, and YOLO object detection, segmentation & pose estimation.</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ BIG PICTURE ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE7F6;">🗺️</div>
+    <div>
+      <div class="section-title">The Big Picture — What's in Part 5?</div>
+      <div class="section-subtitle">6 major sections covering the full computer vision toolkit</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>Part 4 taught you how CNNs work. Part 5 shows you how they're used <strong>in practice</strong> — the architectures, techniques, and tools that power real-world computer vision systems like self-driving cars, face recognition, and security cameras.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--vgg);">🏗️ VGG &<br>ResNet</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--transfer);">🎓 Transfer<br>Learning</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#FDCB6E;color:#2D3436;">📸 Data<br>Augment.</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">🔍 Feature<br>Extraction</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--yolo);">📦 YOLO<br>Detection</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#E74C3C;">🏃 Pose &<br>Segment.</div>
+    </div>
+
+    <p>Everything uses <strong>CIFAR-10</strong> (60,000 32×32 color images, 10 classes: airplane, car, bird, cat, deer, dog, frog, horse, ship, truck) as the main dataset, with a 10,000-image subset for fast training.</p>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 1: ARCHITECTURES ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D5CAFF;">🏗️</div>
+    <div>
+      <div class="section-title">Part 1: VGG vs ResNet — Architecture Evolution</div>
+      <div class="section-subtitle">Deep stacking vs skip connections on CIFAR-10</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <h3 class="sub" style="color:var(--vgg);">VGG-Style Architecture</h3>
+    <p>VGG's philosophy: use simple, uniform 3×3 convolutions stacked deeper and deeper. More layers = more abstraction.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--vgg);">Conv 64×2<br>+ Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--vgg);">Conv 128×2<br>+ Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--vgg);">Conv 256×2<br>+ Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">Flatten</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#2D3436;">Dense 512<br>→ Dense 10</div>
+    </div>
+
+    <h3 class="sub" style="color:var(--resnet);">ResNet-Style Architecture (Skip Connections)</h3>
+    <p>ResNet's breakthrough: <strong>skip connections</strong> that let information bypass layers. Instead of learning a complete transformation, each block only learns the <em>residual</em> (difference) — making it much easier to train very deep networks.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--resnet);">Conv 32<br>+ BN</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--resnet);">Res Block<br>32 + Skip</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--resnet);">Res Block<br>32 + Skip</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">GlobalAvg<br>Pool</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#2D3436;">Dense 64<br>→ Dense 10</div>
+    </div>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> <strong>VGG</strong> is like a long chain of students passing a message — each student rewrites the entire message. If the chain is too long, the message gets garbled (vanishing gradients). <strong>ResNet</strong> solves this by giving each student a copy of the ORIGINAL message alongside the modified one — so even if the modifications fail, the original still gets through via the skip connection.
+    </div>
+
+    <h3 class="sub">Results on CIFAR-10</h3>
+    <div class="bar-visual">
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--vgg);">VGG-Style</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:61.7%;background:var(--vgg);">61.7%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--resnet);">ResNet-Style</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:43.3%;background:var(--resnet);">43.3%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>📌 Why VGG won here:</strong> The ResNet-style model used only 32 filters per block (lightweight) while VGG used up to 256. On tiny 32×32 images with only 10K training samples, the simpler VGG with more filters had an advantage. On larger datasets (ImageNet), ResNet dramatically outperforms VGG — this is a dataset-size effect.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 2: TRANSFER LEARNING ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D6EAF8;">🎓</div>
+    <div>
+      <div class="section-title">Part 2: Transfer Learning & Fine-Tuning</div>
+      <div class="section-subtitle">MobileNetV2 (ImageNet) → CIFAR-10: freeze → train head → unfreeze → fine-tune</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>This section demonstrates the full transfer learning workflow — the same technique that powered 77.8% on 37 pet breeds in your practice project.</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--transfer)">Stage</th><th style="background:var(--transfer)">What Happens</th><th style="background:var(--transfer)">Learning Rate</th><th style="background:var(--transfer)">Result</th></tr>
+      <tr><td><strong>1. Load Base</strong></td><td>MobileNetV2 with ImageNet weights, 154 layers, top removed</td><td>—</td><td>—</td></tr>
+      <tr><td><strong>2. Freeze + Train Head</strong></td><td>All 154 base layers frozen. Only train: GlobalAvgPool → Dense(256) → Dropout → Dense(10)</td><td>1e-4</td><td>61.5%</td></tr>
+      <tr><td><strong>3. Fine-Tune</strong></td><td>Unfreeze last 20 layers. Retrain with very small LR</td><td>1e-5 (10× smaller)</td><td><strong>63.0%</strong></td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Stage 2 is like hiring an experienced painter (MobileNetV2) and only teaching them YOUR color preferences — they keep all their painting skills frozen. Stage 3 (fine-tuning) is like saying "OK, now you can also slightly adjust your brushstroke technique for my specific style" — but carefully, with tiny changes, so you don't ruin what they already know.
+    </div>
+
+    <div class="key-point">
+      <strong>💡 Why the low learning rate for fine-tuning?</strong> The pre-trained weights are already excellent. A large learning rate would destroy them — like editing a masterpiece painting with a house-painting roller. Using 1e-5 (10× smaller than the head training) makes small, careful adjustments that preserve the base knowledge.
+    </div>
+
+    <div class="info-box">
+      <strong>📌 Note on CIFAR-10 results:</strong> Transfer learning "only" reached 63% here because CIFAR-10 images are tiny (32×32 upscaled to 96×96) — very blurry for a model trained on 224×224 ImageNet images. On full-resolution images (like Oxford Pets), transfer learning crushes training from scratch.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 3: DATA AUGMENTATION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFF9C4;">📸</div>
+    <div>
+      <div class="section-title">Part 3: Data Augmentation — Free Training Data</div>
+      <div class="section-subtitle">Rotation, flipping, shifting, zoom — without vs with augmentation</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Data augmentation creates modified versions of training images on-the-fly: rotating, flipping, shifting, and zooming. This effectively multiplies your dataset size and forces the model to learn <em>invariant</em> features.</p>
+
+    <table class="nice-table">
+      <tr><th style="background:#E67E22">Augmentation</th><th style="background:#E67E22">What It Does</th><th style="background:#E67E22">Why It Helps</th></tr>
+      <tr><td><strong>rotation_range=15°</strong></td><td>Slightly rotates images</td><td>Objects aren't always perfectly upright</td></tr>
+      <tr><td><strong>width/height_shift=0.1</strong></td><td>Shifts image left/right/up/down by 10%</td><td>Objects aren't always centered</td></tr>
+      <tr><td><strong>horizontal_flip</strong></td><td>Mirrors image horizontally</td><td>A car facing left is still a car</td></tr>
+      <tr><td><strong>zoom_range=0.2</strong></td><td>Zooms in/out by up to 20%</td><td>Objects appear at different scales</td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Imagine you have 10 flashcards to study. Without augmentation, you see the same 10 cards every time. WITH augmentation, each time you look at a card, it's slightly tilted, shifted, or zoomed — so it's like having 100 different versions. You learn the CONCEPT, not just the specific card.
+    </div>
+
+    <div class="key-point">
+      <strong>💡 The Key Effect:</strong> Without augmentation, the training accuracy climbs much faster than validation accuracy (overfitting). With augmentation, the gap is smaller — the model generalizes better. Augmentation reduces overfitting at the cost of slower training.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 4: CV TASKS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8E8E8;">🔍</div>
+    <div>
+      <div class="section-title">Part 4: Feature Extraction & ImageNet Classification</div>
+      <div class="section-subtitle">ResNet50 with 1,000 classes + visualizing what CNNs "see"</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>This section loads <strong>ResNet50</strong> (pre-trained on ImageNet's 1,000 classes) and demonstrates two things: classifying images into any of 1,000 categories, and <strong>visualizing feature maps</strong> to see what CNNs actually detect at each layer.</p>
+
+    <div class="info-box">
+      <strong>📌 Feature Map Visualization:</strong> By extracting outputs from intermediate layers, you can literally SEE what the CNN "looks at." Early layers detect edges and colors (low-level). Later layers detect shapes, textures, and eventually objects (high-level). The notebook displays 32 feature maps from the first convolutional layer.
+    </div>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Feature maps are like asking each neuron "what do you see?" Early neurons say "I see a horizontal line here" or "I see a red patch there." Later neurons say "I see an eye" or "I see a wheel." The final neurons say "This is a car!"
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 5: YOLO ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FADADD;">📦</div>
+    <div>
+      <div class="section-title">Part 5: YOLO Object Detection — Beyond Classification</div>
+      <div class="section-subtitle">YOLOv8: detect WHAT + WHERE in a single pass</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Everything up to this point was <strong>classification</strong>: "What is in this image?" YOLO answers a much harder question: <strong>"What objects are here, and WHERE exactly are they?"</strong></p>
+
+    <div class="task-grid">
+      <div class="task-card" style="border-color:var(--transfer);background:rgba(9,132,227,.04)">
+        <h4 style="color:var(--transfer);">🏷️ Classification</h4>
+        <p>"This is a cat"</p>
+      </div>
+      <div class="task-card" style="border-color:var(--yolo);background:rgba(225,112,85,.04)">
+        <h4 style="color:var(--yolo);">📦 Object Detection</h4>
+        <p>"A cat at (120,80) and a dog at (300,200)"</p>
+      </div>
+      <div class="task-card" style="border-color:#E74C3C;background:rgba(231,76,60,.04)">
+        <h4 style="color:#E74C3C;">🎭 Segmentation</h4>
+        <p>"These exact pixels are the cat"</p>
+      </div>
+      <div class="task-card" style="border-color:var(--vgg);background:rgba(108,92,231,.04)">
+        <h4 style="color:var(--vgg);">🏃 Pose Estimation</h4>
+        <p>"The person's left elbow is at (150,200)"</p>
+      </div>
+    </div>
+
+    <h3 class="sub" style="color:var(--yolo);">YOLOv8 — You Only Look Once</h3>
+    <p>YOLO processes the entire image in a <strong>single forward pass</strong> — no sliding windows, no region proposals. This makes it incredibly fast, suitable for real-time video.</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--yolo)">Model</th><th style="background:var(--yolo)">Size</th><th style="background:var(--yolo)">Speed</th><th style="background:var(--yolo)">Accuracy</th></tr>
+      <tr><td><strong>YOLOv8n</strong> (used here)</td><td>Nano — 3.2M params</td><td>Fastest (~64ms)</td><td>Good</td></tr>
+      <tr><td>YOLOv8s</td><td>Small</td><td>Fast</td><td>Better</td></tr>
+      <tr><td>YOLOv8m</td><td>Medium</td><td>Moderate</td><td>Good balance</td></tr>
+      <tr><td>YOLOv8l</td><td>Large</td><td>Slower</td><td>High</td></tr>
+      <tr><td>YOLOv8x</td><td>Extra Large</td><td>Slowest</td><td>Best</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--yolo);">Detection Results</h3>
+    <p>On the sample bus image, YOLOv8n detected:</p>
+    <table class="nice-table">
+      <tr><th style="background:var(--yolo)">Object</th><th style="background:var(--yolo)">Confidence</th></tr>
+      <tr><td>🚌 Bus</td><td><strong>86.8%</strong></td></tr>
+      <tr><td>🧑 Person #1</td><td>86.4%</td></tr>
+      <tr><td>🧑 Person #2</td><td>83.3%</td></tr>
+      <tr><td>🧑 Person #3</td><td>81.1%</td></tr>
+      <tr><td>🧑 Person #4</td><td>33.4%</td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Classification is like a teacher asking "What subject is this textbook about?" YOLO is like asking "List every object on this desk, draw a box around each one, and tell me how confident you are." It's like having superhuman eyes that can identify and locate every object in a scene in milliseconds.
+    </div>
+
+    <h3 class="sub">The Notebook Also Covers:</h3>
+    <table class="nice-table">
+      <tr><th style="background:#636E72">Feature</th><th style="background:#636E72">What It Does</th><th style="background:#636E72">YOLO Model Used</th></tr>
+      <tr><td><strong>Video Detection</strong></td><td>Process every frame of a video, draw bounding boxes</td><td>yolov8n.pt</td></tr>
+      <tr><td><strong>Webcam Detection</strong></td><td>Real-time detection from live camera feed</td><td>yolov8n.pt</td></tr>
+      <tr><td><strong>Custom Training</strong></td><td>Train YOLO on your OWN objects (dataset structure, YAML config)</td><td>yolov8n.pt (fine-tune)</td></tr>
+    </table>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 6: SEGMENTATION & POSE ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFEBEE;">🎭</div>
+    <div>
+      <div class="section-title">Part 6: Instance Segmentation & Pose Estimation</div>
+      <div class="section-subtitle">Pixel-level masks and 17-point skeleton detection</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <h3 class="sub" style="color:#E74C3C;">Instance Segmentation (yolov8n-seg)</h3>
+    <p>Goes beyond bounding boxes — produces a <strong>pixel-level mask</strong> showing the exact outline of each detected object. Not just "there's a bus here" but "these specific pixels ARE the bus."</p>
+
+    <h3 class="sub" style="color:var(--vgg);">Pose Estimation (yolov8n-pose)</h3>
+    <p>Detects <strong>17 body keypoints</strong> on each person — nose, eyes, ears, shoulders, elbows, wrists, hips, knees, ankles — and connects them into a skeleton.</p>
+
+    <div class="info-box">
+      <strong>📌 Real-World Uses:</strong> Pose estimation powers fitness apps (checking exercise form), sports analytics (tracking athlete movements), sign language recognition, and motion capture for movies and games.
+    </div>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Think of three levels of "seeing":<br>
+      <strong>Detection:</strong> "There's a person in the top-left corner" (bounding box)<br>
+      <strong>Segmentation:</strong> "Here's the exact silhouette of that person" (pixel mask)<br>
+      <strong>Pose:</strong> "Their left arm is raised and right knee is bent" (skeleton)
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ SUMMARY ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div>
+      <div class="section-title">Summary — What You Learned!</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #1 — Architecture Matters.</strong> VGG stacks simple layers deep. ResNet adds skip connections to solve vanishing gradients. Both are foundational — modern architectures build on these ideas.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #2 — Transfer Learning Has Two Stages.</strong> First freeze the base and train a new head (fast, safe). Then fine-tune the last few layers with a tiny learning rate (careful improvement). This went from 61.5% → 63.0%.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #3 — Data Augmentation = Free Regularization.</strong> Rotations, flips, and shifts reduce overfitting by forcing the model to learn robust features rather than memorizing specific training images.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #4 — Computer Vision Is More Than Classification.</strong> YOLO can detect, segment, and estimate pose — all in real-time. You can even train it on your own custom objects!
+    </div>
+
+    <div style="background:linear-gradient(135deg,#0984E3,#6C5CE7,#E17055);border-radius:14px;padding:20px;margin-top:16px;color:#fff;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">🗺️ The Full Course So Far:</h4>
+      <p style="opacity:.92;font-size:.9rem;">
+      <strong>Part 1:</strong> ML fundamentals & preprocessing<br>
+      <strong>Part 2:</strong> Regression deep dive<br>
+      <strong>Part 3:</strong> Classification & ensembles<br>
+      <strong>Part 4:</strong> Neural networks, basic CNNs, RNNs<br>
+      <strong>Part 5:</strong> Advanced CNNs, transfer learning, YOLO detection, segmentation & pose 🆕<br><br>
+      You've gone from linear regression all the way to real-time object detection! 🚀
+      </p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>

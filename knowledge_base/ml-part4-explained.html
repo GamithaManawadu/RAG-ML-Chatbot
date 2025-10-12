@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Learning Part 4 — Neural Networks & Deep Learning Explained!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F0F2F9;--card:#FFF;--nn:#FF6B6B;--bp:#4ECDC4;--act:#FFE66D;--dl:#A8E6CF;--cnn:#FF8B94;--rnn:#6C5CE7;--opt:#00B894;--reg:#FD79A8;--text:#2D3436;--text-light:#636E72;--shadow:0 4px 24px rgba(0,0,0,.06);--radius:18px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#0F0C29 0%,#302B63 50%,#24243E 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(78,205,196,.15) 0%,transparent 50%),radial-gradient(circle at 80% 50%,rgba(255,107,107,.15) 0%,transparent 50%)}
+  .hero::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(2rem,5vw,3.2rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero h1 span{background:linear-gradient(90deg,#FF6B6B,#4ECDC4,#FFE66D);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero p{color:rgba(255,255,255,.78);font-size:1.15rem;max-width:660px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04);animation:fadeUp .5s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.2rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text-light);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text-light)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:15000px}
+  .section-content{padding:0 26px 26px}
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid #F39C12;border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:#E67E22}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid #27AE60;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:#27AE60}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid #E74C3C;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:#E74C3C}
+  .info-box{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-left:4px solid #3498DB;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:#3498DB}
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.88rem}
+  .nice-table th{padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500;color:#fff}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:nth-child(even) td{background:#fafafa}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+  .flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:16px 0;justify-content:center}
+  .flow-box{color:#fff;padding:9px 14px;border-radius:10px;font-size:.78rem;font-weight:500;text-align:center;min-width:80px}
+  .flow-arrow{font-size:1.1rem;color:#636E72}
+  .nn-diagram{display:flex;justify-content:center;align-items:center;gap:24px;margin:20px 0;flex-wrap:wrap}
+  .nn-layer{display:flex;flex-direction:column;gap:8px;align-items:center}
+  .nn-node{width:28px;height:28px;border-radius:50%;border:2px solid}
+  .nn-label{font-size:.75rem;font-weight:600;margin-top:4px}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:14px}
+  .summary-card{border-radius:14px;padding:18px;color:#fff;text-align:center}
+  .summary-card h4{font-family:'Fredoka',sans-serif;font-size:1rem;margin-bottom:6px}
+  .summary-card p{font-size:.83rem;opacity:.92}
+  .code-block{background:#1e1e2e;color:#cdd6f4;border-radius:12px;padding:16px;font-family:'Courier New',monospace;font-size:.82rem;margin:12px 0;overflow-x:auto;line-height:1.5}
+  .code-block .kw{color:#cba6f7}
+  .code-block .fn{color:#89b4fa}
+  .code-block .str{color:#a6e3a1}
+  .code-block .cm{color:#6c7086}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🧠 <span>Neural Networks & Deep Learning</span></h1>
+  <p>Part 4: Perceptrons, Backpropagation, CNNs, RNNs, Optimizers & Regularization — the stuff that powers ChatGPT, self-driving cars, and image recognition. All explained simply!</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ BIG PICTURE ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE7F6;">🗺️</div>
+    <div>
+      <div class="section-title">The Big Picture — Welcome to Deep Learning!</div>
+      <div class="section-subtitle">Parts 1-3 were "traditional ML." Part 4 is where the magic happens.</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>Parts 1–3 covered algorithms like linear regression, decision trees, and SVMs. Part 4 enters the world of <strong>neural networks</strong> — the technology behind AI image generation, language models like ChatGPT, self-driving cars, and voice assistants.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--nn);">🧩 Perceptron<br>&amp; MLP</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--bp);">⛓️ Back-<br>propagation</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#E67E22;">⚡ Activation<br>Functions</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--dl);">🔧 Keras /<br>TensorFlow</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--cnn);">📷 CNNs<br>(Images)</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--rnn);">📈 RNNs<br>(Sequences)</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--opt);">⚙️ Optimizers</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--reg);">🛡️ Regulariz-<br>ation</div>
+    </div>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Parts 1–3 taught you to ride a bicycle (simple ML). Part 4 teaches you to drive a car, then a truck, then a racecar. Neural networks are more powerful but also more complex — they need more fuel (data), a better engine (GPUs), and a skilled driver (you, tuning hyperparameters!).
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 1: FUNDAMENTALS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFEBEE;">🧩</div>
+    <div>
+      <div class="section-title">Part 1: Neural Network Fundamentals — The Building Blocks</div>
+      <div class="section-subtitle">Perceptrons, MLPs, XOR problem, Universal Approximation</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <h3 class="sub" style="color:var(--nn);">The Perceptron — The Simplest "Brain Cell"</h3>
+
+    <div class="analogy">
+      <strong>🧠 School Analogy:</strong> A single neuron in your brain receives signals from other neurons, adds them up, and fires if the total is strong enough. A <strong>perceptron</strong> does exactly the same thing: it takes inputs, multiplies each by a weight (importance), adds them up, and outputs 1 if the sum crosses a threshold, or 0 if not. It's a single yes/no decision-maker.
+    </div>
+
+    <p>The notebook builds a Perceptron from scratch in Python and tests it on two problems:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--nn)">Problem</th><th style="background:var(--nn)">Can Perceptron Solve It?</th><th style="background:var(--nn)">Why?</th></tr>
+      <tr><td><strong>Linearly Separable Data</strong></td><td>✅ YES — 100% accuracy</td><td>A single straight line can divide the two classes</td></tr>
+      <tr><td><strong>XOR Problem</strong></td><td>❌ NO — ~50% accuracy (random!)</td><td>No single straight line can separate XOR outputs</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--nn);">The MLP — Stacking Neurons to Solve Anything</h3>
+
+    <div class="analogy">
+      <strong>🏗️ School Analogy:</strong> If one student can't solve a problem alone, you form a group! A <strong>Multi-Layer Perceptron (MLP)</strong> is a network of neurons organized in layers. The first layer sees the raw data. The middle ("hidden") layers find increasingly complex patterns. The final layer gives the answer.<br><br>
+      Think of it like an assembly line: raw materials → worker 1 shapes them → worker 2 refines → worker 3 paints → finished product.
+    </div>
+
+    <p>The notebook builds a 2-layer MLP from scratch and it solves XOR with <strong>100% accuracy</strong> — proving that adding hidden layers unlocks the ability to learn non-linear patterns.</p>
+
+    <div class="key-point">
+      <strong>💡 Universal Approximation Theorem:</strong> An MLP with enough hidden neurons can approximate ANY continuous function. This is the theoretical foundation of deep learning — neural networks can, in principle, learn anything.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 2: BACKPROPAGATION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E0F7FA;">⛓️</div>
+    <div>
+      <div class="section-title">Part 2: Backpropagation — How Neural Networks Learn</div>
+      <div class="section-subtitle">The chain rule, gradients, forward pass, backward pass</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Imagine you're playing a game of telephone. A message goes forward through 5 people (forward pass). The last person writes down the final answer. Then the teacher says "you were wrong by this much." That correction travels BACKWARD through all 5 people (backward pass), and each person adjusts how they whisper to improve next time. That's backpropagation!
+    </div>
+
+    <h3 class="sub" style="color:var(--bp);">The Two Passes</h3>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--bp)">Pass</th><th style="background:var(--bp)">Direction</th><th style="background:var(--bp)">What Happens</th><th style="background:var(--bp)">School Version</th></tr>
+      <tr><td><strong>Forward Pass</strong></td><td>Input → Output</td><td>Data flows through each layer, getting transformed, until a prediction pops out</td><td>Students pass a message forward through the chain</td></tr>
+      <tr><td><strong>Backward Pass</strong></td><td>Output → Input</td><td>The error flows backward, and each layer's weights are nudged to reduce the error</td><td>The correction travels back — each person learns how to whisper better</td></tr>
+    </table>
+
+    <p>The notebook implements a <strong>DetailedNN</strong> class with a [2, 8, 4, 1] architecture (2 inputs, 8→4 hidden neurons, 1 output) and trains it on a regression task. It visualizes:</p>
+
+    <div class="info-box">
+      <strong>📊 What the Charts Show:</strong><br>
+      <strong>Loss Curve:</strong> Error decreasing over time (the network is learning!)<br>
+      <strong>Gradient Magnitudes:</strong> How big the corrections are at each layer — crucial for diagnosing vanishing/exploding gradients<br>
+      <strong>Activation Distributions:</strong> What values the neurons are outputting at each layer<br>
+      <strong>Actual vs. Predicted:</strong> How close the final predictions are to truth
+    </div>
+
+    <div class="warning">
+      <strong>⚠️ Gradient Problems:</strong> In deep networks, gradients can <strong>vanish</strong> (shrink to zero — early layers stop learning) or <strong>explode</strong> (grow huge — weights go haywire). The notebook uses gradient clipping and proper weight initialization (Xavier/He) to prevent this.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 3: ACTIVATION FUNCTIONS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFFDE7;">⚡</div>
+    <div>
+      <div class="section-title">Part 3: Activation Functions — The Secret Sauce</div>
+      <div class="section-subtitle">Sigmoid, Tanh, ReLU, Leaky ReLU, Swish, GELU</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Without activation functions, a neural network is just a fancy linear regression — no matter how many layers you stack. Activation functions add <strong>non-linearity</strong>, letting the network learn curves, edges, and complex patterns.</p>
+
+    <div class="analogy">
+      <strong>🎨 School Analogy:</strong> Imagine you can only draw with a ruler (linear). You can make straight lines, but never a circle. Activation functions are like giving you a compass, a protractor, and freehand ability — now you can draw ANYTHING.
+    </div>
+
+    <table class="nice-table">
+      <tr><th style="background:#E67E22">Function</th><th style="background:#E67E22">Shape</th><th style="background:#E67E22">Range</th><th style="background:#E67E22">Problem</th><th style="background:#E67E22">Best For</th></tr>
+      <tr><td><strong>Sigmoid</strong></td><td>S-curve</td><td>(0, 1)</td><td>Vanishing gradients</td><td>Output layer for probabilities</td></tr>
+      <tr><td><strong>Tanh</strong></td><td>S-curve (centered)</td><td>(−1, 1)</td><td>Vanishing gradients</td><td>RNNs, hidden layers</td></tr>
+      <tr><td><strong>ReLU</strong></td><td>Flat then diagonal</td><td>[0, ∞)</td><td>"Dead neurons" (stuck at 0)</td><td>Default for hidden layers!</td></tr>
+      <tr><td><strong>Leaky ReLU</strong></td><td>Slight slope then diagonal</td><td>(−∞, ∞)</td><td>Fixes dead neurons</td><td>Deep networks</td></tr>
+      <tr><td><strong>Swish</strong></td><td>Smooth curve</td><td>(−∞, ∞)</td><td>Slightly slower</td><td>Modern architectures</td></tr>
+      <tr><td><strong>GELU</strong></td><td>Smooth curve</td><td>(−∞, ∞)</td><td>Slightly slower</td><td>Transformers (GPT, BERT)</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:#E67E22;">The Vanishing Gradient Problem</h3>
+    <p>The notebook shows a dramatic chart: as a network gets deeper, sigmoid gradients shrink <strong>exponentially</strong> — by layer 10, the gradient is essentially zero. ReLU fixes this because its gradient is either 0 or 1, never a tiny fraction. This is why ReLU became the default for deep learning.</p>
+
+    <div class="warning">
+      <strong>⚠️ Dead Neurons:</strong> ReLU outputs exactly 0 for negative inputs. If a neuron's weights drift so that it always receives negative input, it's permanently "dead" — it stops learning entirely. Leaky ReLU fixes this by allowing a tiny gradient for negative values.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 4: KERAS / TENSORFLOW ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🔧</div>
+    <div>
+      <div class="section-title">Part 4: Deep Learning with Keras/TensorFlow</div>
+      <div class="section-subtitle">Building real models with industry tools — digit classification</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Parts 1–3 built neural networks from scratch in NumPy. Now the notebook switches to <strong>TensorFlow/Keras</strong> — the professional framework used by Google, Tesla, and thousands of companies.</p>
+
+    <div class="analogy">
+      <strong>🏗️ School Analogy:</strong> Building from scratch was like building a house brick by brick to understand construction. Keras is like using pre-fabricated walls and a crane — same result, 100x faster. You still need to know the architecture, but the heavy lifting is automated.
+    </div>
+
+    <h3 class="sub" style="color:var(--dl);">Handwritten Digit Classification</h3>
+    <p>The notebook builds an MLP with <strong>128 → 64 → 32</strong> hidden neurons to classify the Digits dataset (8×8 pixel images of digits 0–9). Key features:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:#27AE60">Feature</th><th style="background:#27AE60">What It Does</th><th style="background:#27AE60">School Analogy</th></tr>
+      <tr><td><strong>Dropout (30%)</strong></td><td>Randomly turns off 30% of neurons during training</td><td>Randomly removing students from the study group so no one can freeload — everyone must learn independently</td></tr>
+      <tr><td><strong>Early Stopping</strong></td><td>Stops training when validation loss stops improving</td><td>The teacher says "you've studied enough — more cramming will just confuse you"</td></tr>
+      <tr><td><strong>ReduceLROnPlateau</strong></td><td>Cuts the learning rate when progress stalls</td><td>When you're close to the answer, take smaller, more careful steps instead of big leaps</td></tr>
+      <tr><td><strong>Softmax Output</strong></td><td>Converts 10 output neurons into probabilities that sum to 1</td><td>Splits 100% confidence across all 10 digit options</td></tr>
+    </table>
+
+    <div class="key-point">
+      <strong>💡 Result:</strong> The Keras MLP achieves high accuracy on digit classification, with training/validation curves showing good convergence without overfitting. The notebook visualizes sample predictions with confidence scores — green for correct, red for incorrect.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 5: CNNs ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FCE4EC;">📷</div>
+    <div>
+      <div class="section-title">Part 5: CNNs — Neural Networks That "See"</div>
+      <div class="section-subtitle">Convolutional layers, pooling, feature maps, MNIST</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="analogy">
+      <strong>👁️ School Analogy:</strong> When you look at a photo of a cat, you don't analyze every pixel independently. Your eyes detect <strong>local features</strong> first — edges, curves, textures — then combine them into shapes (ears, tail), then combine shapes into the whole object (cat!). CNNs work the same way:<br><br>
+      <strong>Layer 1:</strong> Detects edges and simple patterns (like ╱ ╲ ── │)<br>
+      <strong>Layer 2:</strong> Combines edges into shapes (curves, corners)<br>
+      <strong>Layer 3:</strong> Combines shapes into objects (face, wheel, letter)<br>
+      <strong>Final Layer:</strong> "That's a 7!"
+    </div>
+
+    <h3 class="sub" style="color:var(--cnn);">The Architecture</h3>
+    <p>The notebook builds a CNN for <strong>MNIST</strong> (28×28 handwritten digit images — the "Hello World" of deep learning) with this architecture:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--cnn)">Layer</th><th style="background:var(--cnn)">What It Does</th><th style="background:var(--cnn)">School Analogy</th></tr>
+      <tr><td><strong>Conv2D</strong> (32 filters, 3×3)</td><td>Slides a 3×3 window across the image, detecting local patterns</td><td>Looking at the image through a tiny magnifying glass, one small patch at a time</td></tr>
+      <tr><td><strong>BatchNormalization</strong></td><td>Normalizes layer outputs to keep values stable</td><td>Resetting everyone to the same starting line between rounds</td></tr>
+      <tr><td><strong>MaxPooling2D</strong> (2×2)</td><td>Shrinks the image by keeping only the strongest signals in each 2×2 region</td><td>Summarizing a paragraph by keeping only the key sentence</td></tr>
+      <tr><td><strong>Dropout</strong> (25%)</td><td>Randomly disables neurons to prevent overfitting</td><td>Pop quiz — some students are absent, so the rest can't rely on them</td></tr>
+      <tr><td><strong>Flatten</strong></td><td>Converts 2D feature maps into a 1D vector</td><td>Laying out all your notes in a single line before writing the essay</td></tr>
+      <tr><td><strong>Dense + Softmax</strong></td><td>Final classification into 10 digit classes</td><td>Reading all the clues and writing your final answer</td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>📊 Data Augmentation:</strong> The notebook uses <strong>ImageDataGenerator</strong> to randomly rotate, shift, and zoom training images. This teaches the CNN to recognize digits even if they're slightly tilted or off-center — like how you can read someone's messy handwriting because you've seen many variations.
+    </div>
+
+    <div class="key-point">
+      <strong>💡 CNN vs MLP:</strong> The notebook directly compares CNN vs MLP accuracy on the same data. CNNs typically win because they understand spatial relationships — they know that neighboring pixels matter, while an MLP treats each pixel independently.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 6: RNNs ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE7F6;">📈</div>
+    <div>
+      <div class="section-title">Part 6: RNNs — Neural Networks with Memory</div>
+      <div class="section-subtitle">SimpleRNN, LSTM, GRU, BiLSTM, Stacked LSTM</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="analogy">
+      <strong>📖 School Analogy:</strong> Regular neural networks have amnesia — they forget what they just saw. RNNs have <strong>memory</strong>. Reading a sentence word by word, an RNN remembers the previous words to understand the current one. "The bank of the <strong>river</strong>" vs "The bank of <strong>England</strong>" — the word "bank" means completely different things depending on what came before it!
+    </div>
+
+    <p>The notebook generates a synthetic <strong>time series</strong> with trend + seasonality + noise, then trains 5 different RNN architectures to predict the next value:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--rnn)">Model</th><th style="background:var(--rnn)">Key Idea</th><th style="background:var(--rnn)">School Analogy</th></tr>
+      <tr><td><strong>SimpleRNN</strong></td><td>Basic memory — passes hidden state from step to step</td><td>A student who remembers the last thing said but slowly forgets older stuff</td></tr>
+      <tr><td><strong>LSTM</strong></td><td>Long Short-Term Memory — has gates to decide what to remember, forget, and output</td><td>A student with a notebook who writes down important things, crosses out irrelevant ones, and reads from their notes to answer</td></tr>
+      <tr><td><strong>GRU</strong></td><td>Gated Recurrent Unit — simplified LSTM with fewer gates</td><td>Same notebook student but with a simpler system — faster but nearly as effective</td></tr>
+      <tr><td><strong>BiLSTM</strong></td><td>Reads the sequence forwards AND backwards</td><td>Reading a sentence left-to-right AND right-to-left to understand it better</td></tr>
+      <tr><td><strong>Stacked LSTM</strong></td><td>Two LSTM layers on top of each other</td><td>First student extracts basic patterns, second student finds deeper patterns from those</td></tr>
+    </table>
+
+    <div class="warning">
+      <strong>⚠️ Why LSTM beats SimpleRNN:</strong> SimpleRNN suffers from vanishing gradients — it can't remember things from more than ~10-20 steps ago. LSTM has special "gates" (forget gate, input gate, output gate) that control what information to keep and what to discard. This lets it remember patterns across hundreds of time steps.
+    </div>
+
+    <div class="key-point">
+      <strong>💡 The notebook compares all 5 architectures</strong> on training loss, validation loss, parameter count, and performance-vs-complexity. Typically, LSTM or GRU gives the best balance of accuracy and efficiency.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 7: OPTIMIZERS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">⚙️</div>
+    <div>
+      <div class="section-title">Part 7: Optimizers — How to Descend the Mountain</div>
+      <div class="section-subtitle">SGD, Momentum, RMSprop, Adam, AdamW compared</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="analogy">
+      <strong>⛰️ School Analogy:</strong> Training a neural network is like finding the lowest point in a hilly landscape while blindfolded. You can only feel the slope under your feet and take a step downhill. The <strong>optimizer</strong> is your strategy for how to step:
+    </div>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--opt)">Optimizer</th><th style="background:var(--opt)">Strategy</th><th style="background:var(--opt)">Analogy</th></tr>
+      <tr><td><strong>SGD</strong></td><td>Take a step proportional to the slope</td><td>Blindfolded hiker taking careful steps — slow but steady</td></tr>
+      <tr><td><strong>SGD + Momentum</strong></td><td>Like SGD but remembers previous steps — builds up speed</td><td>A ball rolling downhill — gains speed in consistent directions, slows at turns</td></tr>
+      <tr><td><strong>RMSprop</strong></td><td>Adjusts step size per feature based on recent gradient history</td><td>Take big steps on flat ground, small steps on steep terrain</td></tr>
+      <tr><td><strong>Adam</strong></td><td>Combines Momentum + RMSprop — the best of both worlds</td><td>A smart ball that speeds up on flat plains AND slows down on steep cliffs. THE default choice!</td></tr>
+      <tr><td><strong>AdamW</strong></td><td>Adam with proper weight decay (regularization built in)</td><td>Adam but with a GPS that gently pulls you toward simpler paths</td></tr>
+    </table>
+
+    <p>The notebook trains the same network architecture on <strong>California Housing</strong> data with all 5 optimizers and compares convergence speed and final performance.</p>
+
+    <div class="key-point">
+      <strong>💡 Practical Advice:</strong> Adam is the default choice for almost all problems. Use SGD+Momentum when you need the absolute best performance and have time to tune the learning rate. AdamW is becoming the new standard, especially for large models.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 8: REGULARIZATION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FCE4EC;">🛡️</div>
+    <div>
+      <div class="section-title">Part 8: Regularization — Preventing Neural Networks from Cheating</div>
+      <div class="section-subtitle">Dropout, BatchNorm, L2, Early Stopping, Combined</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Neural networks are SO powerful that they can memorize training data instead of learning general patterns. Regularization techniques force the network to generalize.</p>
+
+    <p>The notebook trains 5 versions of the same architecture on California Housing data:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--reg)">Method</th><th style="background:var(--reg)">How It Prevents Overfitting</th><th style="background:var(--reg)">School Analogy</th></tr>
+      <tr><td><strong>Baseline</strong><br>(no regularization)</td><td>No protection — memorizes freely</td><td>Student studies with all notes, textbook, and answers available. Learns to copy, not understand.</td></tr>
+      <tr><td><strong>L2 Regularization</strong></td><td>Penalizes large weights — keeps coefficients small</td><td>"Your essay can't have any word more than 10 letters." Forces simpler, cleaner expression.</td></tr>
+      <tr><td><strong>Dropout</strong></td><td>Randomly disables 30-50% of neurons each training step</td><td>Random students are removed from each study group session. No one can rely on the same partner — everyone must learn independently.</td></tr>
+      <tr><td><strong>Batch Normalization</strong></td><td>Normalizes each layer's outputs to have mean=0, std=1</td><td>After each class, everyone's grades are re-curved so no one is too far ahead or behind. Stabilizes learning.</td></tr>
+      <tr><td><strong>Combined</strong><br>(L2 + Dropout + BatchNorm)</td><td>All three techniques working together</td><td>The strict school: word limits + random group changes + grade curving. Usually the best results!</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--reg);">L2 Strength Analysis</h3>
+    <p>The notebook also tests different L2 regularization strengths (0, 0.001, 0.01, 0.1, 1.0) and plots performance — showing that too little regularization leads to overfitting while too much leads to underfitting. There's a sweet spot in the middle.</p>
+
+    <div class="key-point">
+      <strong>💡 Key Charts:</strong> The notebook visualizes the "overfitting gap" (validation loss minus training loss) for each method. A big gap = overfitting. The Combined method typically has the smallest gap and most stable training.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ SUMMARY ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div>
+      <div class="section-title">Summary — Your Neural Network Cheat Sheet!</div>
+      <div class="section-subtitle">Everything from Part 4 at a glance</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="summary-grid">
+      <div class="summary-card" style="background:linear-gradient(135deg,#FF6B6B,#ee5a24);">
+        <h4>Perceptron & MLP</h4>
+        <p>Single neuron = linear only. Stack layers → solve anything (Universal Approximation).</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#4ECDC4,#0abab5);">
+        <h4>Backpropagation</h4>
+        <p>Forward: compute prediction. Backward: send error back, update all weights using the chain rule.</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#E67E22,#f39c12);">
+        <h4>Activations</h4>
+        <p>ReLU for hidden layers (default). Sigmoid for binary output. Softmax for multiclass. GELU for transformers.</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#FF8B94,#c0392b);">
+        <h4>CNNs</h4>
+        <p>Conv → Pool → Conv → Pool → Dense. "See" local patterns in images. Outperform MLPs on spatial data.</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#6C5CE7,#a29bfe);">
+        <h4>RNNs / LSTMs</h4>
+        <p>Memory for sequences. LSTM gates control what to remember/forget. Use for time series and text.</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#00B894,#00cec9);">
+        <h4>Optimizers</h4>
+        <p>Adam = default. SGD+Momentum for fine-tuning. AdamW for large models. Always try Adam first.</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#FD79A8,#e84393);">
+        <h4>Regularization</h4>
+        <p>Dropout + BatchNorm + L2 = the triple shield. Early stopping = free regularization. Combine them!</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#636E72,#2d3436);">
+        <h4>Keras/TF</h4>
+        <p>Sequential API for simple models. Callbacks for smart training. model.fit() does the magic.</p>
+      </div>
+    </div>
+
+    <div class="key-point" style="margin-top:20px;">
+      <strong>🎯 The #1 Takeaway:</strong> Neural networks are powerful but need careful management. Choose the right architecture for your data type (MLP for tabular, CNN for images, RNN for sequences), the right activation (ReLU default), the right optimizer (Adam default), and enough regularization (Dropout + BatchNorm) to prevent overfitting. Then iterate!
+    </div>
+
+    <div style="background:linear-gradient(135deg,#0F0C29,#302B63);border-radius:14px;padding:20px;margin-top:16px;color:#fff;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">🗺️ The Complete ML Journey:</h4>
+      <p style="opacity:.9;font-size:.92rem;">
+      <strong>Part 1:</strong> ML fundamentals — supervised, unsupervised, reinforcement, preprocessing<br>
+      <strong>Part 2:</strong> Regression — linear, polynomial, metrics, cross-validation, bias-variance<br>
+      <strong>Part 3:</strong> Classification — logistic regression, trees, SVM, ensembles, ROC/AUC<br>
+      <strong>Part 4:</strong> Deep learning — neural networks, backprop, CNNs, RNNs, optimizers, regularization<br><br>
+      You now have a complete foundation from basic ML to deep learning! 🚀
+      </p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>

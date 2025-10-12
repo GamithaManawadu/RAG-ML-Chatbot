@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIAR Dataset: Enhanced Models — Explained!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F8F9FA;--card:#FFF;--news:#1A1A2E;--before:#E74C3C;--after:#27AE60;--accent:#3498DB;--gold:#F39C12;--text:#2D3436;--text-light:#636E72;--shadow:0 4px 24px rgba(26,26,46,.08);--radius:18px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#0F3460 0%,#16213E 40%,#E94560 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(255,255,255,.02) 80px,rgba(255,255,255,.02) 81px)}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(1.8rem,5vw,3rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero h1 span{color:#4ECDC4}
+  .hero p{color:rgba(255,255,255,.82);font-size:1.1rem;max-width:680px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.18rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text-light);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text-light)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:14000px}
+  .section-content{padding:0 26px 26px}
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid var(--gold);border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:#E67E22}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid var(--after);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:var(--after)}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid var(--before);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:var(--before)}
+  .info-box{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-left:4px solid var(--accent);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:var(--accent)}
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.86rem}
+  .nice-table th{padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500;color:#fff}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:nth-child(even) td{background:#fafafa}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+  .bar-visual{margin:14px 0}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .bar-label{width:120px;font-weight:600;font-size:.78rem;text-align:right;flex-shrink:0}
+  .bar-track{flex:1;height:28px;background:#f0f0f0;border-radius:8px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-weight:600;color:#fff;font-size:.78rem}
+  .vs-box{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;margin:20px 0;align-items:center}
+  .vs-card{border-radius:16px;padding:22px;text-align:center}
+  .vs-card h4{font-family:'Fredoka',sans-serif;font-size:.95rem;margin-bottom:4px}
+  .vs-card .score{font-family:'Fredoka',sans-serif;font-size:2.4rem;font-weight:700;line-height:1.1}
+  .vs-card .detail{font-size:.8rem;opacity:.8;margin-top:4px}
+  .vs-text{font-family:'Fredoka',sans-serif;font-size:1.5rem;color:var(--text-light)}
+  .improvement-arrow{display:inline-block;background:var(--after);color:#fff;padding:4px 12px;border-radius:20px;font-family:'Fredoka',sans-serif;font-weight:600;font-size:.9rem}
+  @media(max-width:600px){.vs-box{grid-template-columns:1fr}.vs-text{display:none}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>📰 Fake News Detection: <span>The Sequel</span></h1>
+  <p>Same LIAR dataset, but now with ALL features — text + metadata + feature engineering + ensembles. Accuracy jumps from 25.6% to 44.4%! Here's how and why.</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ BIG PICTURE ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E0F7FA;">🗺️</div>
+    <div>
+      <div class="section-title">The Big Picture — What Changed?</div>
+      <div class="section-subtitle">From text-only (25.6%) to multi-feature (44.4%)</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>The previous LIAR notebook used ONLY the statement text. This notebook takes the lesson learned — <em>"text alone isn't enough"</em> — and acts on it by using <strong>everything available</strong>: text, speaker identity, party affiliation, job title, subject, context, AND the speaker's historical truthfulness record.</p>
+
+    <div class="vs-box">
+      <div class="vs-card" style="background:linear-gradient(135deg,#FFEBEE,#FFCDD2);">
+        <h4 style="color:var(--before);">📰 Previous Notebook</h4>
+        <div class="score" style="color:var(--before);">25.6%</div>
+        <div class="detail">Text-only, 5,000 features</div>
+      </div>
+      <div class="vs-text">→</div>
+      <div class="vs-card" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);">
+        <h4 style="color:var(--after);">🚀 This Notebook</h4>
+        <div class="score" style="color:var(--after);">44.4%</div>
+        <div class="detail">All features, 13,719 features</div>
+      </div>
+    </div>
+
+    <p style="text-align:center;"><span class="improvement-arrow">↑ 18.8 percentage points improvement!</span></p>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> The first notebook was like judging if a student was lying based ONLY on what they said. This notebook is like also checking their past record, who they are, what class they're in, and what topic they're talking about. Much more to work with!
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ FEATURE ENGINEERING ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFF3E0;">🔧</div>
+    <div>
+      <div class="section-title">The Secret Weapon — Feature Engineering</div>
+      <div class="section-subtitle">12 new features created + metadata + categorical encoding</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>The notebook engineers 12 new features from the raw data, then combines them with text and categorical features into a massive 13,719-dimensional feature space:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--gold)">Feature Group</th><th style="background:var(--gold)">Features</th><th style="background:var(--gold)">Count</th><th style="background:var(--gold)">Why It Helps</th></tr>
+      <tr>
+        <td><strong>TF-IDF Text</strong></td>
+        <td>Statement + Context combined, unigrams + bigrams</td>
+        <td>5,000</td>
+        <td>Word patterns in the claim and its context</td>
+      </tr>
+      <tr>
+        <td><strong>Categorical</strong></td>
+        <td>Speaker, Party, Job Title, State, Subject (one-hot encoded)</td>
+        <td>8,703</td>
+        <td>WHO said it matters enormously — some speakers lie more</td>
+      </tr>
+      <tr>
+        <td><strong>Numerical</strong></td>
+        <td>Credibility history, text stats, engineered ratios</td>
+        <td>16</td>
+        <td>Past lying record is the strongest predictor!</td>
+      </tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--gold);">The 12 Engineered Features</h3>
+    <table class="nice-table">
+      <tr><th style="background:#E67E22">Feature</th><th style="background:#E67E22">What It Captures</th></tr>
+      <tr><td><strong>statement_length</strong></td><td>Character count — longer statements may hedge more</td></tr>
+      <tr><td><strong>statement_word_count</strong></td><td>Word count (avg: 18 words per statement)</td></tr>
+      <tr><td><strong>context_length</strong></td><td>Where the statement was made</td></tr>
+      <tr><td><strong>avg_word_length</strong></td><td>Complex vocabulary vs simple language</td></tr>
+      <tr><td><strong>exclamation_count</strong></td><td>Emotional/sensational tone</td></tr>
+      <tr><td><strong>question_count</strong></td><td>Rhetorical questions as a persuasion tactic</td></tr>
+      <tr><td><strong>capital_ratio</strong></td><td>SHOUTING IN ALL CAPS = suspicious?</td></tr>
+      <tr><td><strong>total_statements</strong></td><td>How many times this speaker has been fact-checked</td></tr>
+      <tr><td><strong>false_ratio</strong></td><td>% of speaker's past statements rated false</td></tr>
+      <tr><td><strong>true_ratio</strong></td><td>% of speaker's past statements rated true/half-true</td></tr>
+      <tr><td><strong>pants_fire_ratio</strong></td><td>% of speaker's past statements rated "pants on fire"</td></tr>
+      <tr><td><strong>speaker_experience</strong></td><td>Binned: new / low / medium / high / very_high</td></tr>
+    </table>
+
+    <div class="key-point">
+      <strong>💡 The Most Powerful Features:</strong> The speaker's <strong>historical credibility</strong> (false_ratio, true_ratio, pants_fire_ratio) are likely the strongest predictors. If a politician has been caught lying 40% of the time before, their new statements are more likely to be false too. This is information the text-only model completely lacked!
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ THE MODELS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8EAF6;">🤖</div>
+    <div>
+      <div class="section-title">The Enhanced Models + Ensembles</div>
+      <div class="section-subtitle">Tuned SVM, RF, XGBoost + Hard/Soft Voting</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <table class="nice-table">
+      <tr><th style="background:var(--accent)">Model</th><th style="background:var(--accent)">Key Improvements Over Previous Notebook</th><th style="background:var(--accent)">Accuracy</th></tr>
+      <tr><td><strong>Enhanced SVM</strong></td><td>RBF kernel (non-linear) + class_weight='balanced'</td><td>39.3%</td></tr>
+      <tr><td><strong>Enhanced Random Forest</strong></td><td>200 trees, max_depth=20, balanced weights</td><td>42.2%</td></tr>
+      <tr><td><strong>Enhanced XGBoost</strong></td><td>200 trees, depth=8, subsample=0.8, sample weights</td><td><strong>44.4%</strong></td></tr>
+      <tr><td><strong>Voting Ensemble</strong></td><td>RF + XGBoost + SVM combined (hard vote)</td><td>43.7%</td></tr>
+      <tr><td><strong>Soft Voting Ensemble</strong></td><td>RF + XGBoost combined (probability avg)</td><td>43.4%</td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>📌 Class Weighting:</strong> All models use <strong>balanced class weights</strong> to handle the imbalanced "pants-fire" class (only 955 training samples vs 2,362 for "half-true"). This forces models to pay extra attention to under-represented classes.
+    </div>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> The ensembles work like a panel of judges: each judge (SVM, RF, XGBoost) independently rates the statement, then they vote on the final verdict. The panel is often more accurate than any single judge — though in this case, XGBoost alone slightly beat the panel!
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ THE RESULTS ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D5F5E3;">📊</div>
+    <div>
+      <div class="section-title">The Results — A Massive Improvement</div>
+      <div class="section-subtitle">XGBoost at 44.4% — nearly double the text-only baseline</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="bar-visual">
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--after);">Enhanced XGB 🥇</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:44.4%;background:var(--after);">44.4%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:#2ECC71;">Voting Ensemble</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:43.7%;background:#2ECC71;">43.7%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:#3498DB;">Soft Voting</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:43.4%;background:#3498DB;">43.4%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--gold);">Enhanced RF</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:42.2%;background:var(--gold);">42.2%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:#9B59B6;">Enhanced SVM</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:39.3%;background:#9B59B6;">39.3%</div>
+        </div>
+      </div>
+      <div style="border-top:2px dashed #ddd;margin:12px 0;padding-top:8px;">
+        <div class="bar-row">
+          <div class="bar-label" style="color:var(--before);">Previous Best</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:25.6%;background:var(--before);">25.6%</div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label" style="color:#B2BEC3;">Random Guess</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:16.7%;background:#B2BEC3;">16.7%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub" style="color:var(--after);">Per-Class Performance (Enhanced XGBoost)</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--news)">Class</th><th style="background:var(--news)">Precision</th><th style="background:var(--news)">Recall</th><th style="background:var(--news)">F1</th><th style="background:var(--news)">vs Previous</th></tr>
+      <tr><td><strong>pants-fire</strong></td><td>0.42</td><td>0.73</td><td>0.53</td><td style="color:var(--after);font-weight:700">↑ from 0.14!</td></tr>
+      <tr><td><strong>false</strong></td><td>0.49</td><td>0.49</td><td>0.49</td><td style="color:var(--after);">↑ from 0.33</td></tr>
+      <tr><td><strong>half-true</strong></td><td>0.50</td><td>0.42</td><td>0.45</td><td style="color:var(--after);">↑ from 0.26</td></tr>
+      <tr><td><strong>mostly-true</strong></td><td>0.41</td><td>0.49</td><td>0.45</td><td style="color:var(--after);">↑ from 0.29</td></tr>
+      <tr><td><strong>barely-true</strong></td><td>0.40</td><td>0.39</td><td>0.40</td><td style="color:var(--after);">↑ from 0.19</td></tr>
+      <tr><td><strong>true</strong></td><td>0.43</td><td>0.30</td><td>0.36</td><td style="color:var(--after);">↑ from 0.19</td></tr>
+    </table>
+
+    <div class="key-point">
+      <strong>💡 Biggest Win — "pants-fire" recall jumped from 10% to 73%!</strong> The speaker's historical lying record is an incredibly strong signal for detecting outrageous lies. Previously the model caught only ~9 out of 92 "pants-fire" statements; now it catches ~67 of them.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ WHY IT WORKED ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFF3E0;">💡</div>
+    <div>
+      <div class="section-title">Why This Worked — The Power of Domain Knowledge</div>
+      <div class="section-subtitle">Features > Algorithms</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <table class="nice-table">
+      <tr><th style="background:var(--after)">What Changed</th><th style="background:var(--after)">Impact</th><th style="background:var(--after)">Lesson</th></tr>
+      <tr>
+        <td><strong>Speaker credibility history</strong></td>
+        <td>🟢 Highest impact</td>
+        <td>Past behavior predicts future behavior — a serial liar's new statements are likely false</td>
+      </tr>
+      <tr>
+        <td><strong>Categorical metadata</strong> (speaker, party, subject)</td>
+        <td>🟢 High impact</td>
+        <td>Context matters — the same claim means different things from different speakers on different topics</td>
+      </tr>
+      <tr>
+        <td><strong>Text + Context combined</strong></td>
+        <td>🟡 Medium impact</td>
+        <td>WHERE a statement was made (rally vs interview) provides additional signal</td>
+      </tr>
+      <tr>
+        <td><strong>Text stats</strong> (length, caps, punctuation)</td>
+        <td>🟡 Small impact</td>
+        <td>Linguistic style gives subtle cues but isn't decisive alone</td>
+      </tr>
+      <tr>
+        <td><strong>Class balancing</strong></td>
+        <td>🟢 High for rare classes</td>
+        <td>"pants-fire" recall went from 10% → 73% with balanced weights</td>
+      </tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 The Core Lesson:</strong> Jumping from 25.6% to 44.4% came NOT from fancier algorithms but from <strong>better features</strong>. The same XGBoost algorithm went from 25.6% → 44.4% just by giving it more information. This is the golden rule of applied ML: <em>"garbage in, garbage out"</em> — or in this case, <em>"more signal in, better predictions out."</em>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ SUMMARY ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div>
+      <div class="section-title">Summary — What You Learned!</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #1 — Feature Engineering > Fancy Algorithms.</strong> The same XGBoost algorithm nearly doubled its accuracy (25.6% → 44.4%) just by receiving better features. Spend more time on features than on tuning models.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #2 — Use ALL Available Data.</strong> The previous notebook threw away speaker identity, party affiliation, and credibility history. This notebook used it all. Never ignore metadata — it might be the strongest signal you have.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #3 — Class Imbalance Handling Matters.</strong> Balanced class weights transformed "pants-fire" detection from nearly useless (10% recall) to strong (73% recall). Always address imbalance!
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #4 — Ensembles Don't Always Win.</strong> The Voting Ensemble (43.7%) slightly underperformed the standalone XGBoost (44.4%). Ensembles help when individual models have diverse strengths — here the models were too similar.
+    </div>
+
+    <div style="background:linear-gradient(135deg,#0F3460,#E94560);border-radius:14px;padding:20px;margin-top:16px;color:#fff;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">📈 The Two-Notebook Story Arc:</h4>
+      <p style="opacity:.92;font-size:.9rem;">
+      <strong>Notebook 1 (Text-Only):</strong> All 5 models scored ~21–26%. Lesson: text alone can't determine truth.<br>
+      <strong>Notebook 2 (Enhanced):</strong> With all features, accuracy jumped to 39–44%. Lesson: domain knowledge and feature engineering are the real keys to ML success.<br><br>
+      Together, these two notebooks demonstrate the most important skill in data science: understanding your data and asking <em>"what information am I NOT using that could help?"</em>
+      </p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>

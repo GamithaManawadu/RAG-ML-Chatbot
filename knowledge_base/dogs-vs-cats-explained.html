@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dogs vs Cats Classification — Explained!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#FFF8F0;--card:#FFF;--dog:#FF6B35;--cat:#6C5CE7;--win:#27AE60;--lose:#E74C3C;--text:#2D3436;--text-light:#636E72;--shadow:0 4px 24px rgba(255,107,53,.08);--radius:18px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#FF6B35 0%,#F7DC6F 35%,#6C5CE7 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Ccircle cx='40' cy='40' r='6'/%3E%3C/g%3E%3C/svg%3E")}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(2rem,5vw,3.2rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero p{color:rgba(255,255,255,.88);font-size:1.15rem;max-width:660px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04);animation:fadeUp .5s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.2rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text-light);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text-light)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:12000px}
+  .section-content{padding:0 26px 26px}
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid var(--dog);border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:var(--dog)}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid var(--win);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:var(--win)}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid var(--lose);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:var(--lose)}
+  .info-box{background:linear-gradient(135deg,#EDE7F6,#E8EAF6);border-left:4px solid var(--cat);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:var(--cat)}
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.88rem}
+  .nice-table th{padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500;color:#fff}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:nth-child(even) td{background:#fafafa}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+  .flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:16px 0;justify-content:center}
+  .flow-box{color:#fff;padding:9px 14px;border-radius:10px;font-size:.8rem;font-weight:500;text-align:center;min-width:90px}
+  .flow-arrow{font-size:1.1rem;color:#636E72}
+
+  .big-result{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;margin:20px 0;align-items:center}
+  .result-card{border-radius:16px;padding:24px;text-align:center}
+  .result-card h3{font-family:'Fredoka',sans-serif;font-size:1.1rem;margin-bottom:4px}
+  .result-card .score{font-family:'Fredoka',sans-serif;font-size:2.8rem;font-weight:700;line-height:1.1}
+  .result-card .detail{font-size:.82rem;opacity:.8;margin-top:4px}
+  .vs{font-family:'Fredoka',sans-serif;font-size:1.5rem;color:var(--text-light)}
+
+  .bar-visual{margin:14px 0}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .bar-label{width:80px;font-weight:600;font-size:.85rem;text-align:right}
+  .bar-track{flex:1;height:32px;background:#f0f0f0;border-radius:8px;overflow:hidden;position:relative}
+  .bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-weight:600;color:#fff;font-size:.82rem;transition:width .8s ease}
+
+  @media(max-width:600px){.big-result{grid-template-columns:1fr}.vs{display:none}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🐕 Dogs vs Cats 🐈</h1>
+  <p>Can AI tell a dog from a cat? This notebook builds two models — a Simple Neural Network and a CNN — and compares them head-to-head. Spoiler: one wins by a MASSIVE margin!</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ BIG PICTURE ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFEAA7;">🗺️</div>
+    <div>
+      <div class="section-title">The Big Picture — What's This Project About?</div>
+      <div class="section-subtitle">A head-to-head battle: Simple NN vs CNN on real photos</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>This is a <strong>practical project</strong> that puts theory into action. You take real photographs of dogs and cats (from Kaggle), and build two different neural networks to classify them. Then you compare which one is better — and WHY.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--dog);">📥 Download<br>Dataset</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">✂️ Split<br>70/20/10</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--lose);">🧠 Build<br>Simple NN</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--cat);">🖼️ Build<br>CNN</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--win);">📊 Compare<br>& Analyze</div>
+    </div>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Imagine two students taking an animal identification test. One student (Simple NN) reads every pixel individually, like reading a book letter by letter. The other student (CNN) looks at shapes, textures, and patterns — like actually LOOKING at the picture. Who do you think does better?
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ THE DATA ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D5F5E3;">📸</div>
+    <div>
+      <div class="section-title">Step 1: The Dataset — Real Dog and Cat Photos</div>
+      <div class="section-subtitle">Kaggle dataset, 128×128 images, 70/20/10 split</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>The notebook downloads the <strong>"Dogs vs Cats"</strong> dataset from Kaggle — thousands of real photographs of dogs and cats in all shapes, sizes, poses, and backgrounds.</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--dog)">Setting</th><th style="background:var(--dog)">Value</th><th style="background:var(--dog)">Why</th></tr>
+      <tr><td><strong>Image Size</strong></td><td>128 × 128 pixels</td><td>Small enough to train fast, big enough to see features</td></tr>
+      <tr><td><strong>Color Channels</strong></td><td>3 (RGB)</td><td>Full color — fur color helps distinguish breeds!</td></tr>
+      <tr><td><strong>Train Split</strong></td><td>70%</td><td>Majority of data for learning</td></tr>
+      <tr><td><strong>Validation Split</strong></td><td>20%</td><td>Monitor overfitting during training</td></tr>
+      <tr><td><strong>Test Split</strong></td><td>10%</td><td>Final unseen evaluation</td></tr>
+      <tr><td><strong>Batch Size</strong></td><td>64</td><td>Process 64 images at once for efficient GPU use</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--win);">Preprocessing & Augmentation</h3>
+    <p>Before training, images are <strong>normalized</strong> (pixel values 0–255 → 0–1) and <strong>augmented</strong> with random horizontal flips. This means if the model sees a dog facing left, it also learns from a flipped version facing right — effectively doubling the training data for free!</p>
+  </div></div>
+</div>
+
+<!-- ═══════════ SIMPLE NN ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFEBEE;">🧠</div>
+    <div>
+      <div class="section-title">Step 2: The Simple Neural Network (MLP)</div>
+      <div class="section-subtitle">Flatten → Dense → Dense → Dense → Output</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>The first model is a <strong>fully connected (dense) neural network</strong> — the same type from Part 4. It treats each pixel as an independent input feature.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:#636E72;">Flatten<br>128×128×3<br>= 49,152</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--lose);">Dense<br>512 neurons<br>+ BN + Drop</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--lose);">Dense<br>256 neurons<br>+ BN + Drop</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--lose);">Dense<br>128 neurons<br>+ BN + Drop</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#2D3436;">Sigmoid<br>1 output<br>Dog or Cat</div>
+    </div>
+
+    <div class="analogy">
+      <strong>🧩 School Analogy:</strong> Imagine taking a jigsaw puzzle, ripping ALL the pieces apart and throwing them in a pile. Then trying to guess what the picture shows JUST by looking at individual pieces with no sense of where they were in the image. That's what the Simple NN does — it flattens the 128×128 image into a list of 49,152 numbers and loses ALL spatial information.
+    </div>
+
+    <div class="warning">
+      <strong>⚠️ Problem — 25.3 MILLION parameters!</strong> Because every one of 49,152 input pixels connects to every one of 512 neurons in the first layer, that's already ~25 million connections. This model is HUGE but inefficient — it has no understanding of shapes, edges, or spatial patterns.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ CNN ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE7F6;">🖼️</div>
+    <div>
+      <div class="section-title">Step 3: The CNN (Convolutional Neural Network)</div>
+      <div class="section-subtitle">Conv → Pool → Conv → Pool → Conv → Pool → Dense → Output</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>The CNN keeps the image's 2D structure intact and learns to detect <strong>visual features</strong> — edges, textures, shapes — at increasing levels of complexity.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--cat);">Conv 32<br>+ BN + Pool<br>128→64</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--cat);">Conv 64<br>+ BN + Pool<br>64→32</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--cat);">Conv 128<br>+ BN + Pool<br>32→16</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--cat);">Conv 256<br>+ BN + Pool<br>16→8</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#636E72;">Flatten<br>16,384</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#2D3436;">Dense<br>512→128→1</div>
+    </div>
+
+    <div class="analogy">
+      <strong>👁️ School Analogy:</strong> The CNN looks at photos the way YOU do:<br>
+      <strong>Block 1:</strong> "I see edges, lines, and color boundaries" (ears? nose?)<br>
+      <strong>Block 2:</strong> "I see shapes — round eyes, pointy ears, a snout"<br>
+      <strong>Block 3:</strong> "I see facial structure — whiskers? long nose? floppy ears?"<br>
+      <strong>Block 4:</strong> "I see the whole face pattern — this looks like a dog/cat"<br>
+      <strong>Dense layers:</strong> "Final decision: DOG with 94% confidence!"
+    </div>
+
+    <div class="key-point">
+      <strong>💡 Only 8.8 million parameters!</strong> Despite being 3× SMALLER than the Simple NN, the CNN performs dramatically better. Why? Because convolutional layers <strong>share weights</strong> — the same edge detector is reused across the entire image instead of learning separate weights for every pixel.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ THE RESULTS ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D5F5E3;">🏆</div>
+    <div>
+      <div class="section-title">Step 4: The Results — A DRAMATIC Winner</div>
+      <div class="section-subtitle">56.7% vs 93.6% — not even close!</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="big-result">
+      <div class="result-card" style="background:linear-gradient(135deg,#FFEBEE,#FFCDD2);">
+        <h3 style="color:var(--lose);">🧠 Simple NN</h3>
+        <div class="score" style="color:var(--lose);">56.7%</div>
+        <div class="detail">25.3M parameters</div>
+        <div class="detail">Barely better than guessing!</div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="result-card" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);">
+        <h3 style="color:var(--win);">🖼️ CNN</h3>
+        <div class="score" style="color:var(--win);">93.6%</div>
+        <div class="detail">8.8M parameters</div>
+        <div class="detail">Almost human-level!</div>
+      </div>
+    </div>
+
+    <h3 class="sub">Visual Comparison</h3>
+
+    <div class="bar-visual">
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--lose);">Simple NN</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:56.7%;background:var(--lose);">56.7%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--win);">CNN</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:93.6%;background:var(--win);">93.6%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:#636E72;">Random</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:50%;background:#B2BEC3;">50%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warning">
+      <strong>⚠️ The Simple NN at 56.7% is barely better than a coin flip (50%)!</strong> After 20 epochs of training with 25 million parameters, it essentially failed to learn what makes a dog look different from a cat. It can't understand spatial patterns because it destroyed the image structure during flattening.
+    </div>
+
+    <h3 class="sub" style="color:var(--win);">The Full Comparison</h3>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--cat)">Metric</th><th style="background:var(--cat)">Simple NN</th><th style="background:var(--cat)">CNN</th><th style="background:var(--cat)">Winner</th></tr>
+      <tr><td><strong>Test Accuracy</strong></td><td>56.7%</td><td>93.6%</td><td>🏆 CNN by 36.9 points!</td></tr>
+      <tr><td><strong>Best Validation Accuracy</strong></td><td>66.8%</td><td>95.9%</td><td>🏆 CNN</td></tr>
+      <tr><td><strong>Total Parameters</strong></td><td>25,334,273</td><td>8,847,809</td><td>🏆 CNN — 2.9× smaller!</td></tr>
+      <tr><td><strong>Architecture</strong></td><td>Flatten + Dense</td><td>Conv + Pool + Dense</td><td>🏆 CNN understands images</td></tr>
+    </table>
+
+    <div class="key-point">
+      <strong>💡 The Big Lesson:</strong> The CNN is <strong>3× smaller</strong> AND <strong>37 percentage points more accurate</strong>. Architecture matters more than size! A model designed to understand the STRUCTURE of data (images have spatial patterns) will always beat a brute-force approach that ignores that structure.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ WHY CNN WINS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8EAF6;">🔍</div>
+    <div>
+      <div class="section-title">Why the CNN Wins So Dramatically</div>
+      <div class="section-subtitle">The deep reason behind the 37-point gap</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <table class="nice-table">
+      <tr><th style="background:var(--cat)">CNN Advantage</th><th style="background:var(--cat)">What It Means</th><th style="background:var(--cat)">School Analogy</th></tr>
+      <tr>
+        <td><strong>Spatial Awareness</strong></td>
+        <td>Knows that neighboring pixels form edges and shapes</td>
+        <td>Looking at a photo vs. looking at a shuffled list of pixel colors</td>
+      </tr>
+      <tr>
+        <td><strong>Weight Sharing</strong></td>
+        <td>Same edge detector reused across entire image</td>
+        <td>Learning "what an ear looks like" once, then finding it anywhere in the photo</td>
+      </tr>
+      <tr>
+        <td><strong>Translation Invariance</strong></td>
+        <td>Recognizes a cat whether it's in the corner or center</td>
+        <td>Knowing the letter "A" regardless of where it appears on a page</td>
+      </tr>
+      <tr>
+        <td><strong>Hierarchical Features</strong></td>
+        <td>Builds from edges → shapes → objects progressively</td>
+        <td>Understanding words → sentences → paragraphs → meaning</td>
+      </tr>
+      <tr>
+        <td><strong>Fewer Parameters</strong></td>
+        <td>3× fewer params = less overfitting, faster training</td>
+        <td>A concise essay beats a rambling one — quality over quantity</td>
+      </tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 The Ultimate Analogy:</strong> Imagine two students taking a "guess the animal" test with photos. <strong>Student A (Simple NN)</strong> is blindfolded, given the photos as a LIST of 49,152 numbers (pixel values), and asked to memorize patterns. <strong>Student B (CNN)</strong> can actually SEE the photos and look for ears, snouts, whiskers, and fur patterns. It's obvious who wins — and by exactly how much: 56.7% vs 93.6%.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ WHAT THE CHARTS SHOW ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFF3E0;">📊</div>
+    <div>
+      <div class="section-title">Understanding the Charts</div>
+      <div class="section-subtitle">Training curves, confusion matrices, sample predictions</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <h3 class="sub" style="color:var(--dog);">Training & Validation Curves</h3>
+    <p>The notebook plots accuracy and loss for both models over 20 epochs. You'd see:</p>
+    <p><strong>CNN (blue):</strong> Training and validation accuracy rise steeply together, reaching ~94-96%. The gap between them is small = good generalization, minimal overfitting.</p>
+    <p><strong>Simple NN (red):</strong> Training accuracy may climb to ~65-70%, but validation accuracy stalls around 55-67%. The gap shows overfitting — it memorizes training data but can't generalize.</p>
+
+    <h3 class="sub" style="color:var(--dog);">Confusion Matrices</h3>
+    <p>The confusion matrices show exactly WHERE each model fails:</p>
+
+    <div class="info-box">
+      <strong>📌 CNN Confusion Matrix:</strong> Mostly diagonal (correct!) with very few off-diagonal errors. It rarely confuses dogs for cats or vice versa.<br><br>
+      <strong>📌 Simple NN Confusion Matrix:</strong> Much more spread out — it frequently guesses wrong in both directions. Nearly random performance!
+    </div>
+
+    <h3 class="sub" style="color:var(--dog);">Sample Predictions</h3>
+    <p>The final visualization shows 12 test images with each model's prediction and confidence. You'd see the CNN confidently and correctly labeling most images, while the Simple NN makes many mistakes with lower confidence.</p>
+  </div></div>
+</div>
+
+<!-- ═══════════ SUMMARY ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div>
+      <div class="section-title">Summary — What You Learned!</div>
+      <div class="section-subtitle">The key takeaways from this project</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #1 — Architecture > Size:</strong> The CNN had 3× fewer parameters but was 37 points more accurate. A smaller model with the RIGHT architecture beats a bigger model with the wrong one.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #2 — Use CNNs for Images:</strong> Never use a plain Dense/MLP network for image classification. Flattening destroys spatial information that's critical for understanding visual data.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #3 — Real Data is Messy:</strong> Unlike clean toy datasets (MNIST, Iris), real photos have varying backgrounds, lighting, poses, and sizes. The CNN handles this; the MLP cannot.
+    </div>
+
+    <div style="background:linear-gradient(135deg,#FF6B35,#6C5CE7);border-radius:14px;padding:20px;margin-top:16px;color:#fff;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">🗺️ How This Connects to Your Course:</h4>
+      <p style="opacity:.92;font-size:.92rem;">
+      <strong>Part 1:</strong> ML basics & preprocessing<br>
+      <strong>Part 2:</strong> Regression deep dive<br>
+      <strong>Part 3:</strong> Classification with traditional ML<br>
+      <strong>Part 4:</strong> Neural networks, CNNs, RNNs theory<br>
+      <strong>This Project:</strong> Put Part 4's CNN theory into practice on a REAL problem! This is the bridge from theory to application. 🐕🐈
+      </p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>

@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Learning Part 1 — Explained Simply!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF8F0;
+    --card: #FFFFFF;
+    --accent1: #FF6B35;
+    --accent2: #4ECDC4;
+    --accent3: #7B68EE;
+    --accent4: #FF85A2;
+    --accent5: #2ECC71;
+    --text: #2D3436;
+    --text-light: #636E72;
+    --shadow: 0 4px 24px rgba(0,0,0,0.06);
+    --radius: 18px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 80px 24px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero h1 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: #fff;
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    color: rgba(255,255,255,0.85);
+    font-size: 1.15rem;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* ─── Container ─── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* ─── Section ─── */
+  .section {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 32px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.04);
+    animation: fadeUp .5s ease both;
+  }
+  .section:nth-child(1) { animation-delay: .05s; }
+  .section:nth-child(2) { animation-delay: .1s; }
+  .section:nth-child(3) { animation-delay: .15s; }
+  .section:nth-child(4) { animation-delay: .2s; }
+  .section:nth-child(5) { animation-delay: .25s; }
+  .section:nth-child(6) { animation-delay: .3s; }
+  .section:nth-child(7) { animation-delay: .35s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    padding: 24px 28px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .2s;
+  }
+  .section-header:hover { background: rgba(0,0,0,0.015); }
+
+  .section-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .section-subtitle {
+    font-size: .85rem;
+    color: var(--text-light);
+    margin-top: 2px;
+  }
+
+  .toggle-arrow {
+    margin-left: auto;
+    font-size: 1.2rem;
+    transition: transform .3s;
+    color: var(--text-light);
+  }
+  .section.open .toggle-arrow { transform: rotate(180deg); }
+
+  .section-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .4s ease;
+  }
+  .section.open .section-body {
+    max-height: 6000px;
+  }
+  .section-content {
+    padding: 0 28px 28px;
+  }
+
+  /* ─── Analogy Box ─── */
+  .analogy {
+    background: linear-gradient(135deg, #FFF3E0, #FFF8E1);
+    border-left: 4px solid var(--accent1);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 16px 0;
+    font-size: .95rem;
+  }
+  .analogy strong { color: var(--accent1); }
+
+  /* ─── Key Point ─── */
+  .key-point {
+    background: linear-gradient(135deg, #E8F5E9, #F1F8E9);
+    border-left: 4px solid var(--accent5);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 16px 0;
+  }
+  .key-point strong { color: #27ae60; }
+
+  /* ─── Warning Box ─── */
+  .warning {
+    background: linear-gradient(135deg, #FFEBEE, #FCE4EC);
+    border-left: 4px solid var(--accent4);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 16px 0;
+  }
+  .warning strong { color: #e74c3c; }
+
+  /* ─── Steps ─── */
+  .step {
+    display: flex;
+    gap: 14px;
+    margin: 14px 0;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: .85rem;
+    color: #fff;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ─── Mini-diagram ─── */
+  .flow {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 18px 0;
+    justify-content: center;
+  }
+  .flow-box {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: .82rem;
+    font-weight: 500;
+    text-align: center;
+    min-width: 100px;
+  }
+  .flow-arrow { font-size: 1.2rem; color: var(--accent3); }
+
+  /* ─── Table ─── */
+  .nice-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 16px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: .9rem;
+  }
+  .nice-table th {
+    background: #667eea;
+    color: #fff;
+    padding: 12px 16px;
+    text-align: left;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 500;
+  }
+  .nice-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .nice-table tr:nth-child(even) td { background: #fafafa; }
+
+  p + p { margin-top: 12px; }
+
+  .emoji-big { font-size: 2rem; }
+
+  /* ─── Color-coded tags ─── */
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: .8rem;
+    font-weight: 500;
+  }
+  .tag-supervised { background: #DBEAFE; color: #1E40AF; }
+  .tag-unsupervised { background: #D1FAE5; color: #065F46; }
+  .tag-reinforcement { background: #FDE68A; color: #92400E; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .summary-card {
+    border-radius: 14px;
+    padding: 20px;
+    color: #fff;
+    text-align: center;
+  }
+  .summary-card h4 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+  .summary-card p { font-size: .88rem; opacity: .92; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🧠 Machine Learning Part 1</h1>
+  <p>Your notebook explained like you're in school — with analogies, pictures, and zero jargon left unexplained. Click each section to expand!</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ SECTION 0: BIG PICTURE ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE7F6;">🗺️</div>
+    <div>
+      <div class="section-title">The Big Picture — What Is This Notebook About?</div>
+      <div class="section-subtitle">A bird's-eye view before diving in</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="section-content">
+      <p>This notebook is like a <strong>textbook chapter</strong> that teaches you the basics of Machine Learning (ML) by walking through real examples. It covers <strong>five main topics</strong>:</p>
+
+      <div class="flow">
+        <div class="flow-box">📦 Setup &<br>Imports</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">📈 Supervised<br>Learning</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">🔍 Unsupervised<br>Learning</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">🎮 Reinforcement<br>Learning</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">🧹 Data<br>Preprocessing</div>
+      </div>
+
+      <div class="analogy">
+        <strong>🍕 School Analogy:</strong> Imagine you're learning to cook. First you unpack your ingredients (imports). Then you follow a recipe with instructions (supervised learning). Then you experiment on your own without a recipe (unsupervised learning). Then you learn by trial and error like a game (reinforcement learning). And finally, you learn how to prep and clean your ingredients properly (preprocessing).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 1: IMPORTS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E3F2FD;">📦</div>
+    <div>
+      <div class="section-title">Part 1: Setting Up — The Imports</div>
+      <div class="section-subtitle">Loading tools into your workshop</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="section-content">
+      <p>Before you can do anything in Python, you need to <strong>import libraries</strong> — think of these as apps on your phone. Each one does something specific.</p>
+
+      <div class="analogy">
+        <strong>🎒 School Analogy:</strong> Imagine you're packing a backpack for school. You need a calculator (NumPy), a notebook with a ruler (Pandas), colored pencils (Matplotlib/Seaborn), and your textbook (scikit-learn). The import lines are you packing each tool.
+      </div>
+
+      <table class="nice-table">
+        <tr><th>Library</th><th>What It Does</th><th>School Version</th></tr>
+        <tr><td><strong>pandas</strong></td><td>Organizes data into tables (like Excel)</td><td>📊 A spreadsheet</td></tr>
+        <tr><td><strong>numpy</strong></td><td>Does math on big lists of numbers super fast</td><td>🧮 A super-calculator</td></tr>
+        <tr><td><strong>matplotlib</strong></td><td>Draws charts and graphs</td><td>📐 Graph paper + pencil</td></tr>
+        <tr><td><strong>seaborn</strong></td><td>Draws prettier charts automatically</td><td>🎨 Colored markers</td></tr>
+        <tr><td><strong>scikit-learn</strong></td><td>The actual ML algorithms & tools</td><td>📚 The ML textbook</td></tr>
+        <tr><td><strong>scipy</strong></td><td>Advanced statistics and math</td><td>🔬 Science lab equipment</td></tr>
+      </table>
+
+      <div class="key-point">
+        <strong>💡 Key Concept — <code>np.random.seed(42)</code>:</strong> This makes random things repeatable. It's like saying "use the SAME shuffled deck of cards every time we play" — so everyone who runs this code gets the same results. The number 42 is just a tradition (it's the "answer to everything" from a famous sci-fi book!).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 2: SUPERVISED LEARNING ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8EAF6;">📈</div>
+    <div>
+      <div class="section-title">Part 2: Supervised Learning — House Price Prediction</div>
+      <div class="section-subtitle"><span class="tag tag-supervised">Supervised Learning</span> &nbsp;Using Linear Regression</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="section-content">
+
+      <p><strong>Supervised learning</strong> is when you teach the computer using examples that already have the right answers.</p>
+
+      <div class="analogy">
+        <strong>📝 School Analogy:</strong> Imagine a teacher gives you 100 practice math problems <em>with the answer key</em>. You study the patterns: "Oh, when the numbers are bigger, the answer is bigger too!" Then the teacher gives you 20 <em>new</em> problems WITHOUT answers, and you try to solve them using what you learned. That's supervised learning!
+      </div>
+
+      <p>Here, the notebook uses the <strong>California Housing Dataset</strong> — real data about ~20,000 houses in California. Each house has features like:</p>
+
+      <table class="nice-table">
+        <tr><th>Feature (Input)</th><th>What It Means</th></tr>
+        <tr><td>MedInc</td><td>Median income of people in the area</td></tr>
+        <tr><td>HouseAge</td><td>How old the houses are</td></tr>
+        <tr><td>AveRooms</td><td>Average number of rooms</td></tr>
+        <tr><td>Latitude / Longitude</td><td>Where the house is located</td></tr>
+        <tr><td><strong>Price (Target)</strong></td><td><strong>What we're trying to predict! (in $100,000s)</strong></td></tr>
+      </table>
+
+      <h3 style="font-family:'Fredoka'; margin: 20px 0 10px; color: var(--accent3);">What the Code Does Step by Step</h3>
+
+      <div class="step">
+        <div class="step-num" style="background: var(--accent3);">1</div>
+        <div><strong>Load the data</strong> — Downloads the California housing dataset and puts it in a table.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: var(--accent3);">2</div>
+        <div><strong>Split it 80/20</strong> — 80% of houses are used to <em>train</em> (study), 20% are kept aside to <em>test</em> (the exam). This is called <code>train_test_split</code>.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: var(--accent3);">3</div>
+        <div><strong>Train a Linear Regression model</strong> — The computer draws the best straight line through the data to find the relationship between features and price.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: var(--accent3);">4</div>
+        <div><strong>Predict on the test set</strong> — The model guesses prices for the 20% of houses it hasn't seen.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: var(--accent3);">5</div>
+        <div><strong>Measure how good it is</strong> — Using metrics like R², MSE, MAE.</div>
+      </div>
+
+      <h3 style="font-family:'Fredoka'; margin: 20px 0 10px; color: var(--accent3);">Understanding the Metrics (Report Card!)</h3>
+
+      <div class="analogy">
+        <strong>📊 School Analogy:</strong> Imagine grading a student's test. Different metrics are like different ways to score:
+      </div>
+
+      <table class="nice-table">
+        <tr><th>Metric</th><th>Value</th><th>What It Means (Simply)</th></tr>
+        <tr><td><strong>R² Score</strong></td><td>0.576 (58%)</td><td>Like getting 58% on a test. The model only "understands" 58% of why prices are what they are. Not great — you'd want 80%+.</td></tr>
+        <tr><td><strong>RMSE</strong></td><td>0.746</td><td>The model's guesses are off by about <strong>$74,600</strong> on average. That's a big miss!</td></tr>
+        <tr><td><strong>MAE</strong></td><td>0.533</td><td>The average mistake is about <strong>$53,300</strong>. Still large.</td></tr>
+      </table>
+
+      <div class="warning">
+        <strong>⚠️ The Verdict:</strong> The notebook honestly tells you this model is <strong>not good enough</strong>. A straight line (Linear Regression) is too simple to capture how house prices really work — the real relationship is curvy and complex. It's like trying to describe a winding road using only a ruler. The notebook suggests you'd need fancier models (like Random Forest or XGBoost) to do better.
+      </div>
+
+      <h3 style="font-family:'Fredoka'; margin: 20px 0 10px; color: var(--accent3);">The Charts Explained</h3>
+
+      <p><strong>Feature Coefficients Chart:</strong> Shows which features push the price up or down. But the notebook warns this chart is <em>misleading</em> because the features aren't on the same scale — it's like comparing kilometers to inches.</p>
+
+      <p><strong>Residuals (Errors) Charts:</strong> These show the <em>mistakes</em> the model makes. A good model would show random, small errors centered at zero. This model shows a messy pattern — it really struggles with expensive houses and makes some huge errors.</p>
+
+      <p><strong>Learning Curve:</strong> Shows that giving the model more data doesn't help — it has already maxed out at ~58%. The model itself is the bottleneck, not the amount of data.</p>
+
+      <h3 style="font-family:'Fredoka'; margin: 20px 0 10px; color: var(--accent3);">Cross-Validation (Getting a Fair Grade)</h3>
+      <div class="analogy">
+        <strong>🔄 School Analogy:</strong> Instead of one test, imagine taking 5 different tests on the same material and averaging your scores. That's cross-validation — it makes sure your grade isn't just luck. The notebook splits the data into 5 groups, trains on 4, tests on 1, and rotates. The result (R² ≈ 0.553) confirms the model is consistently mediocre — not a fluke.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 3: UNSUPERVISED LEARNING ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🔍</div>
+    <div>
+      <div class="section-title">Part 3: Unsupervised Learning — Customer Segmentation</div>
+      <div class="section-subtitle"><span class="tag tag-unsupervised">Unsupervised Learning</span> &nbsp;Using K-Means Clustering</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="section-content">
+
+      <p><strong>Unsupervised learning</strong> means there are <strong>no right answers</strong> given. The computer must find patterns on its own.</p>
+
+      <div class="analogy">
+        <strong>🧑‍🤝‍🧑 School Analogy:</strong> Imagine a teacher dumps a big box of mixed LEGO pieces on the table and says "Sort these into groups." No one tells you how to group them — you might sort by color, by size, or by shape. You're discovering the natural groupings yourself. That's unsupervised learning!
+      </div>
+
+      <p>The notebook creates <strong>fake customer data</strong> for a store with 300 customers. Each customer has three measurements:</p>
+
+      <table class="nice-table">
+        <tr><th>Feature</th><th>Example</th></tr>
+        <tr><td>Annual Spending</td><td>$57,450</td></tr>
+        <tr><td>Visit Frequency</td><td>10 visits per year</td></tr>
+        <tr><td>Average Purchase Value</td><td>$5,642</td></tr>
+      </table>
+
+      <h3 style="font-family:'Fredoka'; margin: 20px 0 10px; color: var(--accent2);">How K-Means Works</h3>
+
+      <div class="step">
+        <div class="step-num" style="background: var(--accent2);">1</div>
+        <div><strong>Pick K center points</strong> randomly (here K=3, meaning we want 3 groups).</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: var(--accent2);">2</div>
+        <div><strong>Assign each customer</strong> to the nearest center — like standing closest to one of 3 teachers in a gym.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: var(--accent2);">3</div>
+        <div><strong>Move each center</strong> to the middle of its group.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: var(--accent2);">4</div>
+        <div><strong>Repeat</strong> steps 2-3 until the groups stop changing.</div>
+      </div>
+
+      <div class="key-point">
+        <strong>💡 Important Step — Scaling First!</strong> Before clustering, all features are <strong>standardized</strong> (rescaled so they're on the same playing field). Without this, "Annual Spending" ($35,000-$73,000) would dominate "Visit Frequency" (8-16) just because the numbers are way bigger. Standardizing makes every feature equally important.
+      </div>
+
+      <h3 style="font-family:'Fredoka'; margin: 20px 0 10px; color: var(--accent2);">The Results — 3 Customer Types Found!</h3>
+
+      <table class="nice-table">
+        <tr><th>Cluster</th><th>Customers</th><th>Spending</th><th>Visits</th><th>Avg Purchase</th><th>Description</th></tr>
+        <tr><td>🔴 Cluster 0</td><td>104</td><td>$58,715</td><td>14/yr</td><td>$4,280</td><td><strong>Frequent big spenders</strong> — shop often, spend a lot each time</td></tr>
+        <tr><td>🟢 Cluster 1</td><td>107</td><td>$35,221</td><td>12.5/yr</td><td>$2,961</td><td><strong>Budget shoppers</strong> — visit regularly but spend less</td></tr>
+        <tr><td>🔵 Cluster 2</td><td>89</td><td>$57,304</td><td>8.1/yr</td><td>$7,373</td><td><strong>Luxury buyers</strong> — rarely visit but spend big when they do</td></tr>
+      </table>
+
+      <div class="analogy">
+        <strong>🛍️ Real-World Use:</strong> A store could use these groups to send different marketing: coupons for budget shoppers, VIP invites for luxury buyers, and loyalty rewards for frequent spenders!
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 4: REINFORCEMENT LEARNING ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFF3E0;">🎮</div>
+    <div>
+      <div class="section-title">Part 4: Reinforcement Learning — Grid World Navigation</div>
+      <div class="section-subtitle"><span class="tag tag-reinforcement">Reinforcement Learning</span> &nbsp;Using Q-Learning</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="section-content">
+
+      <p><strong>Reinforcement learning (RL)</strong> is when an <em>agent</em> (like a character in a game) learns by <strong>trial and error</strong>. It gets rewards for good actions and penalties for bad ones.</p>
+
+      <div class="analogy">
+        <strong>🐕 School Analogy:</strong> Imagine training a puppy. You say "sit!" — if the puppy sits, it gets a treat (+reward). If it just stares at you, nothing happens (-small penalty for wasting time). Over many tries, the puppy learns: "sitting = treats!" That's reinforcement learning. No one shows the puppy HOW to sit — it figures it out through rewards.
+      </div>
+
+      <h3 style="font-family:'Fredoka'; margin: 20px 0 10px; color: var(--accent1);">The Game: Grid World</h3>
+
+      <p>The notebook creates a simple 5×5 grid game:</p>
+
+      <div style="background: #F5F5F5; border-radius: 12px; padding: 20px; margin: 16px 0; font-family: monospace; text-align: center; font-size: 1.1rem; line-height: 2;">
+        <strong>START</strong> &nbsp;⬜&nbsp; ⬜&nbsp; ⬜&nbsp; ⬜<br>
+        ⬜&nbsp; ⬜&nbsp; ⬜&nbsp; ⬜&nbsp; ⬜<br>
+        ⬜&nbsp; ⬜&nbsp; ⬜&nbsp; ⬜&nbsp; ⬜<br>
+        ⬜&nbsp; ⬜&nbsp; ⬜&nbsp; ⬜&nbsp; ⬜<br>
+        ⬜&nbsp; ⬜&nbsp; ⬜&nbsp; ⬜&nbsp; <strong>GOAL</strong>
+      </div>
+
+      <p>The agent starts at the <strong>top-left corner</strong> and needs to reach the <strong>bottom-right corner</strong> (the GOAL). It can move up, down, left, or right. Each step costs -1 point (penalty for taking too long), but reaching the goal gives +100 points!</p>
+
+      <h3 style="font-family:'Fredoka'; margin: 20px 0 10px; color: var(--accent1);">How Q-Learning Works</h3>
+
+      <p>The agent builds a <strong>"cheat sheet"</strong> called a <strong>Q-table</strong>. For every square on the grid, it records how good each action (up/down/left/right) is:</p>
+
+      <div class="step">
+        <div class="step-num" style="background: var(--accent1);">1</div>
+        <div><strong>Start with no knowledge</strong> — Q-table is all zeros. The agent has no idea what to do.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: var(--accent1);">2</div>
+        <div><strong>Explore randomly (ε-greedy)</strong> — At first, the agent mostly moves randomly (like a puppy wandering). The "epsilon" (ε) value controls how much it explores vs. uses what it already knows. It starts at 30% random and slowly drops to 1%.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: var(--accent1);">3</div>
+        <div><strong>Update the cheat sheet</strong> — After every move, the agent updates the Q-table: "Moving right from square (2,3) was worth X points." This is the <strong>Q-update formula</strong>.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: var(--accent1);">4</div>
+        <div><strong>Repeat 1,000 times</strong> — After 1,000 episodes (complete games), the agent has a really good cheat sheet and takes the shortest path almost every time.</div>
+      </div>
+
+      <div class="key-point">
+        <strong>💡 Result:</strong> After training, the agent's average reward in the last 100 games was <strong>92.94 out of 100</strong> — meaning it almost always finds a very efficient path to the goal (only losing ~7 points to step penalties = about 8 steps for a minimum-8-step path).
+      </div>
+
+      <h3 style="font-family:'Fredoka'; margin: 20px 0 10px; color: var(--accent1);">The Charts</h3>
+      <p><strong>Rewards per Episode:</strong> Starts very low (the agent was wandering aimlessly) and climbs to near 100 as it learns.</p>
+      <p><strong>Steps per Episode:</strong> Starts high (100 steps, hitting the max) and drops to ~8 (the shortest path).</p>
+      <p><strong>Epsilon Decay:</strong> Shows how exploration drops over time — the agent goes from "mostly random" to "mostly smart."</p>
+      <p><strong>Policy Map:</strong> Shows the final "cheat sheet" — arrows on each square pointing the best direction. You can see it forms a clear path from START to GOAL.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 5: UNDERFITTING/OVERFITTING ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FCE4EC;">⚖️</div>
+    <div>
+      <div class="section-title">Part 5: Underfitting vs. Overfitting</div>
+      <div class="section-subtitle">The Goldilocks problem of machine learning</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="section-content">
+
+      <div class="analogy">
+        <strong>🧸 The Goldilocks Analogy:</strong> This is the most important concept in all of ML, and it works just like Goldilocks and the Three Bears:
+      </div>
+
+      <table class="nice-table">
+        <tr><th>Problem</th><th>What Happens</th><th>Goldilocks</th><th>Example</th></tr>
+        <tr>
+          <td><strong>Underfitting</strong><br>(Too simple)</td>
+          <td>The model is too basic. It doesn't even learn the training data well.</td>
+          <td>🥶 "Too cold!"</td>
+          <td>Drawing a straight line through curvy data. Uses a degree-1 polynomial (just a line).</td>
+        </tr>
+        <tr>
+          <td><strong>Overfitting</strong><br>(Too complex)</td>
+          <td>The model memorizes the training data perfectly but fails on new data.</td>
+          <td>🥵 "Too hot!"</td>
+          <td>Drawing a crazy wiggly curve that goes through every single point. Uses a degree-15 polynomial.</td>
+        </tr>
+        <tr>
+          <td><strong>Good fit</strong><br>(Just right!)</td>
+          <td>The model captures the real pattern without memorizing noise.</td>
+          <td>😊 "Just right!"</td>
+          <td>A smooth curve that follows the general trend. Uses a degree-2 polynomial.</td>
+        </tr>
+      </table>
+
+      <p>The notebook demonstrates this using <strong>car prices vs. car age</strong>: as cars get older, they lose value. A straight line underfits (misses the curve). A degree-15 polynomial overfits (memorizes random noise). A degree-2 curve is just right.</p>
+
+      <div class="warning">
+        <strong>⚠️ Why This Matters:</strong> An overfit model is dangerous because it looks amazing on your training data (100% accuracy!) but totally fails in the real world — like a student who memorized the answer key but can't solve a single new problem.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 6: ML PIPELINE ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E0F7FA;">🔧</div>
+    <div>
+      <div class="section-title">Part 6: The Complete ML Pipeline</div>
+      <div class="section-subtitle">The step-by-step recipe for any ML project</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="section-content">
+
+      <p>The notebook shows the <strong>full lifecycle</strong> of an ML project using the Wine Classification dataset. Think of this as the "recipe" every ML project follows:</p>
+
+      <div class="flow">
+        <div class="flow-box">1. Collect<br>Data</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">2. Explore &<br>Visualize</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">3. Split<br>Train/Test</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">4. Scale<br>Features</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">5. Train<br>Model</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-box">6. Evaluate<br>& Deploy</div>
+      </div>
+
+      <div class="analogy">
+        <strong>🍰 School Analogy:</strong> It's like baking a cake: gather ingredients (data collection), check they're fresh (exploration), measure them out (splitting), prep them (scaling), bake (training), and taste-test (evaluation). Every baker follows this same flow!
+      </div>
+
+      <div class="step">
+        <div class="step-num" style="background: #00BCD4;">1</div>
+        <div><strong>Data Collection:</strong> Load the Wine dataset — 178 wines with 13 chemical features (alcohol content, color intensity, etc.) and a label (which of 3 types of wine it is).</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: #00BCD4;">2</div>
+        <div><strong>Exploration:</strong> Look at the data — how many samples? Any patterns? Visualize relationships.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: #00BCD4;">3</div>
+        <div><strong>Splitting:</strong> 80% for training, 20% for testing.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: #00BCD4;">4</div>
+        <div><strong>Feature Scaling:</strong> Standardize so all features have mean=0 and std=1. Otherwise, "proline" (values ~700) would dominate "ash" (values ~2).</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: #00BCD4;">5</div>
+        <div><strong>Train & Evaluate:</strong> Train a Linear Regression model and check its performance.</div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background: #00BCD4;">6</div>
+        <div><strong>Deploy & Monitor:</strong> Use the model to make predictions on new data and watch for errors.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION 7: PREPROCESSING ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#F3E5F5;">🧹</div>
+    <div>
+      <div class="section-title">Part 7: Data Preprocessing — Cleaning Your Data</div>
+      <div class="section-subtitle">Because garbage in = garbage out</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="section-content">
+
+      <p>Real-world data is <strong>messy</strong>. This section teaches you how to clean it up before feeding it to a model.</p>
+
+      <div class="analogy">
+        <strong>🍳 School Analogy:</strong> Before cooking, you wash vegetables, peel potatoes, remove rotten bits, and chop everything to the same size. You'd never dump unwashed, whole vegetables into a pot! Data preprocessing is the same — clean it, fix it, and standardize it before the model "cooks" with it.
+      </div>
+
+      <h3 style="font-family:'Fredoka'; margin: 20px 0 10px; color: var(--accent3);">The 4 Main Preprocessing Steps</h3>
+
+      <div class="step">
+        <div class="step-num" style="background: var(--accent4);">1</div>
+        <div>
+          <strong>Missing Value Imputation</strong> — Some data has blanks (like a survey where someone skipped a question). The code fills these in with the <strong>average</strong> (mean) or <strong>most common value</strong> (mode) of that column.
+          <div class="analogy" style="margin-top:8px;">
+            <strong>🏫 Like:</strong> If a student missed a test, the teacher might estimate their score as the class average.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num" style="background: var(--accent4);">2</div>
+        <div>
+          <strong>Outlier Detection & Removal (IQR Method)</strong> — Some data points are wildly wrong (like someone's age being listed as 200). The code uses the <strong>IQR method</strong>: find the middle 50% of data, then remove anything too far above or below.
+          <div class="analogy" style="margin-top:8px;">
+            <strong>🏫 Like:</strong> If everyone in class scored 60-90% and one person scored 3%, it's probably a data entry error. Remove it.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num" style="background: var(--accent4);">3</div>
+        <div>
+          <strong>Feature Scaling (Standardization)</strong> — Different features have different ranges. Age might be 18-70, while income might be 20,000-200,000. Standardization transforms everything so every feature has <strong>mean = 0</strong> and <strong>standard deviation = 1</strong>.
+          <div class="analogy" style="margin-top:8px;">
+            <strong>🏫 Like:</strong> Converting test scores from different subjects to percentiles so you can fairly compare them.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num" style="background: var(--accent4);">4</div>
+        <div>
+          <strong>Categorical Encoding</strong> — Computers only understand numbers. So text labels like "Gold / Silver / Bronze" (membership types) get converted:
+          <br>• <strong>Label Encoding</strong> → Gold=0, Silver=1, Bronze=2 (for ordered categories)
+          <br>• <strong>One-Hot Encoding</strong> → Creates separate yes/no columns: "is_North?", "is_South?", "is_East?", "is_West?" (for unordered categories)
+          <div class="analogy" style="margin-top:8px;">
+            <strong>🏫 Like:</strong> A survey that says "circle your region" gets turned into a row of checkboxes for the computer.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SUMMARY ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div>
+      <div class="section-title">Summary — What You Learned!</div>
+      <div class="section-subtitle">The cheat sheet</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="section-content">
+
+      <div class="summary-grid">
+        <div class="summary-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+          <h4>Supervised Learning</h4>
+          <p>Learn from examples with known answers. "Here's the question AND the answer — learn the pattern."</p>
+        </div>
+        <div class="summary-card" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+          <h4>Unsupervised Learning</h4>
+          <p>Find hidden patterns with no answers given. "Sort these into groups — you figure out how."</p>
+        </div>
+        <div class="summary-card" style="background: linear-gradient(135deg, #F2994A, #F2C94C);">
+          <h4>Reinforcement Learning</h4>
+          <p>Learn by trial and error with rewards. "Try things, get points, improve over time."</p>
+        </div>
+        <div class="summary-card" style="background: linear-gradient(135deg, #E44D26, #F16529);">
+          <h4>Don't Forget!</h4>
+          <p>Always clean your data first. Handle missing values, remove outliers, scale features, encode text → numbers.</p>
+        </div>
+      </div>
+
+      <div class="key-point" style="margin-top: 24px;">
+        <strong>🎯 The #1 Takeaway:</strong> Machine learning is NOT magic. It's a process — collect data, clean it, pick a model, train it, evaluate it, and improve it. The notebook showed you that even the simplest model (Linear Regression) can teach you a lot, and being honest about when a model fails is just as important as celebrating when it works!
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggle(header) {
+  header.closest('.section').classList.toggle('open');
+}
+</script>
+</body>
+</html>

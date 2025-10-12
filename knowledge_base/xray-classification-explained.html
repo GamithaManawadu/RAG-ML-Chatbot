@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical X-Ray Classification Explained!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F0F2F5;--card:#FFF;--cnn:#3B82F6;--frozen:#8B5CF6;--fine:#EC4899;--pos:#27AE60;--neg:#E74C3C;--text:#1E293B;--text2:#64748B;--shadow:0 4px 24px rgba(139,92,246,.08);--radius:18px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#1E40AF 0%,#7C3AED 50%,#DB2777 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23ffffff' fill-opacity='0.06'/%3E%3C/svg%3E")}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(1.8rem,5vw,3rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero p{color:rgba(255,255,255,.85);font-size:1.05rem;max-width:680px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.18rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text2);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text2)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:25000px}
+  .section-content{padding:0 26px 26px}
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid #E67E22;border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:#E67E22}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid #27AE60;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:#27AE60}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid #E74C3C;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:#E74C3C}
+  .info-box{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-left:4px solid var(--cnn);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:var(--cnn)}
+  .purple-box{background:linear-gradient(135deg,#F3E8FF,#EDE9FE);border-left:4px solid var(--frozen);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .purple-box strong{color:var(--frozen)}
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.86rem}
+  .nice-table th{padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500;color:#fff}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:last-child td{border-bottom:none}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+  .flow{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:16px 0;justify-content:center}
+  .flow-box{color:#fff;padding:8px 14px;border-radius:10px;font-size:.73rem;font-weight:500;text-align:center;min-width:70px}
+  .flow-arrow{font-size:1rem;color:#94A3B8}
+  .bar-visual{margin:14px 0}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .bar-label{width:170px;font-weight:600;font-size:.78rem;text-align:right;flex-shrink:0}
+  .bar-track{flex:1;height:30px;background:#f0f0f0;border-radius:8px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-weight:600;color:#fff;font-size:.8rem}
+  .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+  .vs-card{border-radius:14px;padding:18px;border:2px solid}
+  .vs-card h4{font-family:'Fredoka',sans-serif;font-size:.95rem;margin-bottom:6px}
+  .vs-card p{font-size:.83rem;color:var(--text2);line-height:1.5}
+  .nb-img{width:100%;border-radius:12px;margin:14px 0;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1px solid #e2e8f0}
+  .nb-img-row{display:flex;gap:12px;margin:14px 0}.nb-img-row img{flex:1;min-width:0;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1px solid #e2e8f0}
+  .img-caption{text-align:center;font-size:.78rem;color:var(--text2);margin-top:-8px;margin-bottom:10px}
+  @media(max-width:600px){.vs-grid{grid-template-columns:1fr}.bar-label{width:120px;font-size:.7rem}.nb-img-row{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🏥 Medical X-Ray Classification</h1>
+  <p>Classifying chest X-rays as Normal vs Pneumonia using three CNN approaches, with Grad-CAM heatmaps proving the model looks at the right lung regions.</p>
+</div>
+
+<div class="container">
+
+<!-- BIG PICTURE -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE9FE;">🗺️</div>
+    <div><div class="section-title">The Big Picture - What's This Project About?</div><div class="section-subtitle">3 models, medical metrics, and explainability that matters</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>Can a neural network look at a chest X-ray and tell whether a patient has pneumonia? More importantly can we <strong>prove</strong> it's actually looking at the lungs and not just memorising image artifacts?</p>
+    <p>This project compares three approaches on 5,863 chest X-ray images:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--cnn);">Model</th><th style="background:var(--cnn);">Architecture</th><th style="background:var(--cnn);">Training</th><th style="background:var(--cnn);">Test Accuracy</th></tr>
+      <tr><td><strong>A : Simple CNN</strong></td><td>3-block CNN from scratch</td><td>Learns everything from zero</td><td><strong>78.5%</strong></td></tr>
+      <tr><td><strong>B : Frozen MobileNetV2</strong></td><td>Pre-trained base + custom head</td><td>Only head trains (base frozen)</td><td><strong>89.9%</strong></td></tr>
+      <tr><td><strong>C : Fine-Tuned MobileNetV2</strong></td><td>Last 20 layers unfrozen</td><td>Head + last 20 layers at LR=1e-5</td><td><strong>87.7%</strong></td></tr>
+    </table>
+
+    <div class="analogy"><strong>🏫 School Analogy:</strong> Model A is a medical student starting from scratch, learning what lungs, ribs, and pneumonia look like for the first time. Model B is a radiologist from another country — they already understand anatomy (ImageNet) but need to learn the specific hospital's X-ray style. Model C is that same radiologist doing a refresher course, fine-tuning their existing knowledge.</div>
+  </div></div>
+</div>
+
+<!-- DATASET -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#DBEAFE;">📊</div>
+    <div><div class="section-title">The Dataset- Chest X-Ray Images</div><div class="section-subtitle">5,863 images, 3:1 class imbalance, Kermany et al.</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <table class="nice-table">
+      <tr><th style="background:var(--cnn);">Split</th><th style="background:var(--cnn);">Normal</th><th style="background:var(--cnn);">Pneumonia</th><th style="background:var(--cnn);">Total</th></tr>
+      <tr><td>Train</td><td>~1,341 (26%)</td><td>~3,875 (74%)</td><td>~5,216</td></tr>
+      <tr><td>Validation</td><td>8</td><td>8</td><td>16 ⚠️</td></tr>
+      <tr><td>Test</td><td>234 (37.5%)</td><td>390 (62.5%)</td><td>624</td></tr>
+    </table>
+
+    <img class="nb-img" src="../images/class_distribution.png" alt="Class Distribution">
+    <img class="nb-img" src="../images/sample_xrays.png" alt="Sample X-Rays">
+
+    <div class="warning"><strong>⚠️ Two Key Challenges:</strong> (1) <strong>3:1 class imbalance</strong> - nearly 3× more Pneumonia than Normal. Handled with computed class weights (Normal=1.94×, Pneumonia=0.67×). (2) <strong>Tiny validation set</strong> only 16 images makes val metrics extremely noisy, causing EarlyStopping to be unreliable. This affected Model A and Model C training significantly.</div>
+
+    <h3 class="sub" style="color:var(--cnn);">Medical Augmentation, Conservative by Design</h3>
+    <p>Unlike general image augmentation, medical images need <strong>conservative</strong> transforms to keep anatomy realistic:</p>
+    <table class="nice-table">
+      <tr><th style="background:var(--pos);">Allowed</th><th style="background:var(--neg);">Not Allowed</th></tr>
+      <tr><td>Rotation ±10° (slight tilt)</td><td>Large rotation (lungs don't rotate 45°)</td></tr>
+      <tr><td>Horizontal flip (lungs are roughly symmetric)</td><td>Vertical flip (anatomy doesn't flip upside down)</td></tr>
+      <tr><td>Small zoom ±10%, tiny shifts ±5%</td><td>Extreme zoom/crop (loses diagnostic regions)</td></tr>
+      <tr><td>Slight brightness ±10%</td><td>Colour jitter (X-rays are grayscale)</td></tr>
+    </table>
+  </div></div>
+</div>
+
+<!-- MODEL A -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:rgba(59,130,246,.1);">🧱</div>
+    <div><div class="section-title">Model A: Simple CNN from Scratch -> 78.5%</div><div class="section-subtitle">3 conv blocks, no pre-training, struggles with small data</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <div class="flow">
+      <div class="flow-box" style="background:var(--cnn);">Conv 32×2<br>+ Pool</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--cnn);">Conv 64×2<br>+ Pool</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--cnn);">Conv 128×2<br>+ Pool</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#475569;">GlobalAvgPool<br>+ Dense 256</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--neg);">Sigmoid<br>(0 or 1)</div>
+    </div>
+    <p>Training was unstable, validation accuracy swung wildly between 95.3% and 27.3% across epochs. The tiny 16-image validation set means each val batch is essentially random. EarlyStopping restored weights from epoch 8 (best val_loss), but the resulting model only achieved <strong>78.5%</strong> on the proper test set.</p>
+    <div class="info-box"><strong>📌 Lesson:</strong> Training from scratch on only ~5,200 images is hard. The model has to learn EVERYTHING, edge detection, texture recognition, anatomical structure, AND disease patterns - from a relatively tiny dataset.</div>
+  </div></div>
+</div>
+
+<!-- MODEL B -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:rgba(139,92,246,.1);">🧊</div>
+    <div><div class="section-title">Model B: Frozen MobileNetV2 - 89.9% ⭐</div><div class="section-subtitle">Pre-trained on ImageNet, only classification head trained</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <div class="flow">
+      <div class="flow-box" style="background:var(--frozen);">MobileNetV2<br>🔒 ALL FROZEN<br>(ImageNet weights)</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#475569;">GlobalAvgPool</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#475569;">Dense 256<br>+ Dropout 0.5</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--neg);">Sigmoid</div>
+    </div>
+    <p>Training was much more stable - val_accuracy steadily improved from 87.6% to 95.5%. The pre-trained features from ImageNet (edges, textures, shapes learned from 1.4M natural images) transferred well to X-rays, even though X-rays look very different from cats and cars!</p>
+    <p>Result: <strong>89.9%</strong> - an 11.4 percentage point jump over Model A, with far fewer trainable parameters and faster convergence.</p>
+    <div class="key-point"><strong>💡 Why ImageNet Features Work for X-Rays:</strong> Early convolutional layers detect universal low-level features (edges, gradients, textures) that exist in ALL images - X-rays included. Only the high-level layers are domain-specific. By freezing the base and only training the head, we leverage this universal knowledge.</div>
+  </div></div>
+</div>
+
+<!-- MODEL C -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:rgba(236,72,153,.1);">🔥</div>
+    <div><div class="section-title">Model C: Fine-Tuned MobileNetV2 - 87.7%</div><div class="section-subtitle">Last 20 layers unfrozen, LR=1e-5 — overfitting on small data</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <div class="flow">
+      <div class="flow-box" style="background:#475569;">MobileNetV2<br>🔒 First 134 layers</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--fine);">🔓 Last 20 layers<br>(fine-tuned, LR=1e-5)</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#475569;">GAP + Dense</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--neg);">Sigmoid</div>
+    </div>
+    <p>Val accuracy reached an impressive <strong>98.4%</strong> during training, but test accuracy was only <strong>87.7%</strong> — lower than the frozen model (89.9%). What happened?</p>
+    <div class="warning"><strong>⚠️ Why Fine-Tuning Hurt:</strong> With only ~5,200 training images, unfreezing 20 layers gives the model too much freedom — it memorised training-specific patterns instead of learning generalisable features. The 98.4% val accuracy was misleading because the validation set had only 16 images. This is a textbook case of <strong>overfitting due to insufficient data</strong>.</div>
+    <div class="analogy"><strong>🏫 School Analogy:</strong> Imagine an experienced radiologist who "fine-tunes" their knowledge by only studying 16 practice cases. They'd start over-adapting to those specific 16 images instead of getting better at general diagnosis. That's what happened here — the model needs 10,000+ images for fine-tuning to help.</div>
+  </div></div>
+</div>
+
+<!-- BIG COMPARISON -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFF3E0;">📊</div>
+    <div><div class="section-title">The Big Comparison</div><div class="section-subtitle">78.5% → 89.9% → 87.7% — transfer learning wins, fine-tuning needs more data</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <img class="nb-img" src="../images/model_comparison.png" alt="Model Comparison">
+    <img class="nb-img" src="../images/training_curves.png" alt="Training Curves">
+    <div class="bar-visual">
+      <div class="bar-row"><div class="bar-label" style="color:var(--frozen);">B: Frozen MobileNetV2</div><div class="bar-track"><div class="bar-fill" style="width:89.9%;background:var(--frozen);">89.9% ⭐</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--fine);">C: Fine-Tuned MobileNetV2</div><div class="bar-track"><div class="bar-fill" style="width:87.7%;background:var(--fine);">87.7%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--cnn);">A: Simple CNN</div><div class="bar-track"><div class="bar-fill" style="width:78.5%;background:var(--cnn);">78.5%</div></div></div>
+    </div>
+    <div class="key-point"><strong>💡 The Honest Takeaway:</strong> Transfer learning (frozen) crushes training from scratch (+11.4%). Fine-tuning didn't help here — not because the technique is bad, but because the dataset is too small (~5K images). With 10K+ images, fine-tuning would likely surpass the frozen model. Reporting this honestly is more valuable than cherry-picking results.</div>
+  </div></div>
+</div>
+
+<!-- MEDICAL METRICS -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FFEBEE;">🏥</div>
+    <div><div class="section-title">Medical Metrics — Why Recall Matters More Than Accuracy</div><div class="section-subtitle">Sensitivity 96.7%, threshold tuning, false negative analysis</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>In medical screening, not all errors are equal:</p>
+    <div class="vs-grid">
+      <div class="vs-card" style="border-color:var(--neg);background:rgba(231,76,60,.04)">
+        <h4 style="color:var(--neg);">❌ False Negative (DANGEROUS)</h4>
+        <p>Patient has pneumonia but model says "Normal" → goes home untreated → condition worsens → possible hospitalisation or death</p>
+      </div>
+      <div class="vs-card" style="border-color:#F59E0B;background:rgba(245,158,11,.04)">
+        <h4 style="color:#F59E0B;">⚠️ False Positive (Inconvenient)</h4>
+        <p>Patient is healthy but model says "Pneumonia" → gets extra tests → costs money and time, but patient is safe</p>
+      </div>
+    </div>
+
+    <h3 class="sub" style="color:var(--neg);">Model C's Medical Performance</h3>
+    <div class="nb-img-row">
+      <img src="../images/confusion_matrix.png" alt="Confusion Matrix">
+      <img src="../images/roc_curve.png" alt="ROC Curve">
+    </div>
+    <table class="nice-table">
+      <tr><th style="background:var(--fine);">Metric</th><th style="background:var(--fine);">Value</th><th style="background:var(--fine);">Meaning</th></tr>
+      <tr><td><strong>Sensitivity (Recall)</strong></td><td>96.7%</td><td>Catches 96.7% of pneumonia cases</td></tr>
+      <tr><td><strong>Specificity</strong></td><td>72.6%</td><td>Correctly identifies 72.6% of healthy patients</td></tr>
+      <tr><td><strong>Missed Pneumonia</strong></td><td>13 cases</td><td>Out of 390 pneumonia patients, 13 were missed</td></tr>
+      <tr><td><strong>False Alarms</strong></td><td>64 cases</td><td>64 healthy patients flagged (sent for extra tests)</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--neg);">Threshold Tuning for Screening</h3>
+    <p>By adjusting the classification threshold from 0.5 to <strong>0.60</strong>, the model achieves an optimised balance for screening:</p>
+    <img class="nb-img" src="../images/threshold_analysis.png" alt="Threshold Analysis">
+    <table class="nice-table">
+      <tr><th style="background:#475569;">Setting</th><th style="background:#475569;">Threshold</th><th style="background:#475569;">Sensitivity</th><th style="background:#475569;">Specificity</th><th style="background:#475569;">Missed</th></tr>
+      <tr><td>Default</td><td>0.50</td><td>96.7%</td><td>72.6%</td><td>13</td></tr>
+      <tr><td>Recommended</td><td>0.60</td><td>95.9%</td><td>76.5%</td><td>16</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--neg);">Confidence Analysis</h3>
+    <p>The model's confidence correlates well with correctness: average confidence on <strong>correct</strong> predictions was 95.1% vs 79.3% on <strong>wrong</strong> predictions. This means the model "knows when it doesn't know" — a useful property for flagging uncertain cases for human review.</p>
+  </div></div>
+</div>
+
+<!-- GRAD-CAM -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FCE7F3;">🔍</div>
+    <div><div class="section-title">Grad-CAM Proving the Model Looks at the Right Place</div><div class="section-subtitle">The most important part for medical AI trustworthiness</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p><strong>Grad-CAM</strong> (Gradient-weighted Class Activation Mapping) answers the critical question: "WHERE is the model looking to make its decision?"</p>
+
+    <img class="nb-img" src="../images/gradcam_examples.png" alt="Grad-CAM Heatmaps">
+
+    <h3 class="sub" style="color:var(--fine);">How Grad-CAM Works</h3>
+    <div class="flow">
+      <div class="flow-box" style="background:var(--cnn);">Forward pass<br>→ get Conv_1<br>feature maps</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--frozen);">Backward pass<br>→ gradients of<br>prediction</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--fine);">Global avg pool<br>gradients =<br>channel weights</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--neg);">Weighted sum<br>of feature maps<br>= heatmap</div>
+    </div>
+
+    <p>The heatmap shows red/yellow where the model pays the most attention. For a trustworthy medical model, we expect:</p>
+    <table class="nice-table">
+      <tr><th style="background:var(--fine);">For Pneumonia Cases</th><th style="background:var(--pos);">For Normal Cases</th></tr>
+      <tr><td>Attention on cloudy/opaque lung regions (the infection areas)</td><td>Attention spread across clear lung fields</td></tr>
+    </table>
+
+    <div class="purple-box"><strong>🔧 Technical Challenge Solved:</strong> Grad-CAM is straightforward for flat models, but MobileNetV2 was wrapped as a <strong>nested model</strong> inside the outer Functional model. The Conv_1 layer lived inside the nested MobileNetV2 and wasn't directly accessible from the outer model's computation graph. The fix required building a dual-output model from the base model's internals, then manually passing through the head layers inside the GradientTape — all within a single connected computation graph.</div>
+
+    <div class="analogy"><strong>🏫 School Analogy:</strong> Grad-CAM is like asking a student to highlight the parts of an X-ray they used to make their diagnosis. If they highlight the lungs — good, they learned radiology. If they highlight the patient's name tag or image borders — bad, they memorised artifacts instead of learning medicine. This is why Grad-CAM is critical for medical AI and a regulatory requirement.</div>
+  </div></div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div><div class="section-title">Summary</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <div class="bar-visual">
+      <div class="bar-row"><div class="bar-label" style="color:var(--frozen);">B: Frozen MobileNetV2</div><div class="bar-track"><div class="bar-fill" style="width:89.9%;background:var(--frozen);">89.9% ⭐</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--fine);">C: Fine-Tuned MobileNetV2</div><div class="bar-track"><div class="bar-fill" style="width:87.7%;background:var(--fine);">87.7%</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--cnn);">A: Simple CNN</div><div class="bar-track"><div class="bar-fill" style="width:78.5%;background:var(--cnn);">78.5%</div></div></div>
+    </div>
+
+    <div class="key-point"><strong>🎯 Takeaway #1 - Transfer Learning Dominates.</strong> Frozen MobileNetV2 (89.9%) crushed the from-scratch CNN (78.5%) by 11.4 points. ImageNet features — even from natural images — transfer powerfully to grayscale medical images.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #2 - Fine-Tuning Needs Sufficient Data.</strong> Fine-tuning (87.7%) actually performed worse than frozen (89.9%) on this small dataset. With only ~5,200 training images, unfreezing layers led to overfitting. The model hit 98.4% val accuracy but couldn't generalise. This is a valid, honest finding — not a failure.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #3 - Sensitivity > Accuracy for Medical Screening.</strong> Model C's 96.7% sensitivity means it catches nearly all pneumonia cases. The 13 missed cases (3.3%) and 64 false alarms represent a reasonable screening tradeoff — better to over-flag than to miss.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #4 - Grad-CAM Provides Essential Explainability.</strong> Heatmaps confirmed the model focuses on lung regions, not image artifacts. This is a regulatory requirement for medical AI (FDA) and critical for clinician trust.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #5 - Confidence Calibration Works.</strong> The model is less confident when wrong (79.3%) than when right (95.1%), enabling uncertain cases to be flagged for human review.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #6 - Class Weights Handle Imbalance.</strong> The 3:1 Pneumonia:Normal imbalance was addressed with computed class weights (Normal=1.94×), preventing the model from simply predicting "Pneumonia" for everything.</div>
+    <div style="background:linear-gradient(135deg,#1E40AF,#7C3AED,#DB2777);border-radius:14px;padding:20px;margin-top:16px;color:#fff;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">⚠️ Limitations & What Would Improve Results:</h4>
+      <p style="opacity:.92;font-size:.87rem;">
+      The tiny 16-image validation set caused unstable training and unreliable early stopping. With a proper validation split (10–15% of training data), Model A would reach ~85%+ and Model C would likely surpass Model B. The dataset is also from a single institution — external validation on other hospitals' X-rays would test real-world generalisability.
+      </p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Learning Part 3 — Explained Simply!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F0F4FF;
+    --card: #FFFFFF;
+    --accent1: #E74C3C;
+    --accent2: #2ECC71;
+    --accent3: #3498DB;
+    --accent4: #F39C12;
+    --accent5: #9B59B6;
+    --text: #2C3E50;
+    --text-light: #7F8C8D;
+    --shadow: 0 4px 24px rgba(52,152,219,0.08);
+    --radius: 18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#E74C3C 0%,#9B59B6 50%,#3498DB 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(2rem,5vw,3.2rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero p{color:rgba(255,255,255,.88);font-size:1.15rem;max-width:660px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04);animation:fadeUp .5s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.2rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text-light);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text-light)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:15000px}
+  .section-content{padding:0 26px 26px}
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid var(--accent4);border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:var(--accent4)}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid var(--accent2);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:#27ae60}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid var(--accent1);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:var(--accent1)}
+  .info-box{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-left:4px solid var(--accent3);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:var(--accent3)}
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.88rem}
+  .nice-table th{background:var(--accent1);color:#fff;padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:nth-child(even) td{background:#fafafa}
+  .step{display:flex;gap:12px;margin:12px 0;align-items:flex-start}
+  .step-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-weight:600;font-size:.82rem;color:#fff;flex-shrink:0;margin-top:2px}
+  .flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:16px 0;justify-content:center}
+  .flow-box{background:linear-gradient(135deg,#E74C3C,#C0392B);color:#fff;padding:9px 14px;border-radius:10px;font-size:.8rem;font-weight:500;text-align:center;min-width:90px}
+  .flow-arrow{font-size:1.1rem;color:var(--accent1)}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:14px}
+  .summary-card{border-radius:14px;padding:18px;color:#fff;text-align:center}
+  .summary-card h4{font-family:'Fredoka',sans-serif;font-size:1.05rem;margin-bottom:6px}
+  .summary-card p{font-size:.85rem;opacity:.92}
+  .cm-grid{display:grid;grid-template-columns:auto auto;gap:2px;width:fit-content;margin:12px auto;font-family:monospace;font-size:.9rem;text-align:center}
+  .cm-cell{padding:12px 20px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🎯 Machine Learning Part 3</h1>
+  <p>Classification, SVMs, Ensemble Methods, ROC Curves, Class Imbalance & Real-World Projects — all explained like a school lesson. Click to expand!</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ BIG PICTURE ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FADBD8;">🗺️</div>
+    <div>
+      <div class="section-title">The Big Picture — What's in This Notebook?</div>
+      <div class="section-subtitle">Part 3 is all about CLASSIFICATION</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>Part 1 was intro, Part 2 was regression (predicting numbers). <strong>Part 3 is all about classification</strong> — predicting CATEGORIES. "Is this email spam or not?" "Is this tumor malignant or benign?" "What type of wine is this?"</p>
+
+    <div class="flow">
+      <div class="flow-box">🔀 Logistic<br>Regression</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">🌳 Decision<br>Trees</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">📏 Support Vector<br>Machines</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">🌲 Ensemble<br>Methods</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">📊 Performance<br>Evaluation</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">⚖️ Class<br>Imbalance</div>
+    </div>
+
+    <p>It also includes <strong>real-world projects</strong>: predicting Titanic survival, breast cancer diagnosis, wine classification, digit recognition, and credit risk assessment.</p>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> If Part 2 was about predicting "how many marks will you get?" (a number), Part 3 is about predicting "will you pass or fail?" (a category). Same data, totally different question!
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ LOGISTIC REGRESSION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D5F5E3;">🔀</div>
+    <div>
+      <div class="section-title">Part 1: Logistic Regression — Yes or No?</div>
+      <div class="section-subtitle">Breast cancer, Wine, Iris, Digits, & Titanic</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Despite the name, Logistic Regression is a <strong>classification</strong> algorithm, not regression! It predicts the <strong>probability</strong> that something belongs to a category.</p>
+
+    <div class="analogy">
+      <strong>🎰 School Analogy:</strong> Imagine a weather app that says "80% chance of rain." It doesn't say exactly how much rain — it gives a probability. If it's above 50%, you bring an umbrella (predict "rain"). If below 50%, you don't (predict "no rain"). That's logistic regression! It converts features into a probability using an S-shaped curve called the <strong>sigmoid function</strong>.
+    </div>
+
+    <h3 class="sub" style="color: var(--accent2);">Binary vs. Multiclass Classification</h3>
+    <table class="nice-table">
+      <tr><th>Type</th><th>Question</th><th>Example in Notebook</th><th>Accuracy</th></tr>
+      <tr><td><strong>Binary</strong> (2 classes)</td><td>Yes or No?</td><td>Breast Cancer: Malignant or Benign?</td><td>94.7%</td></tr>
+      <tr><td><strong>Multiclass</strong> (3+ classes)</td><td>Which one?</td><td>Wine: Type 0, 1, or 2?</td><td>94.4%</td></tr>
+      <tr><td><strong>Multiclass</strong></td><td>Which one?</td><td>Iris: Setosa, Versicolor, or Virginica?</td><td>97.4%</td></tr>
+      <tr><td><strong>Multiclass</strong> (10 classes)</td><td>Which digit?</td><td>Handwritten Digits: 0–9?</td><td>96.0%</td></tr>
+    </table>
+
+    <h3 class="sub" style="color: var(--accent2);">Titanic Survival Prediction</h3>
+    <p>The notebook uses the famous <strong>Titanic dataset</strong> (891 passengers) to predict who survived. Features include passenger class, sex, age, fare, and number of family members aboard.</p>
+
+    <div class="key-point">
+      <strong>💡 Key Preprocessing Steps:</strong> The Titanic data is messy — missing ages, text columns like "male"/"female" that need encoding, and the "deck" column with 77% missing data (dropped entirely). The notebook fills missing ages with the median and converts text to numbers before training.
+    </div>
+
+    <div class="info-box">
+      <strong>📌 How the Sigmoid Works:</strong> The model calculates a score for each passenger. The sigmoid function squishes this score into a 0–1 range. If the probability > 0.5, it predicts "survived." If < 0.5, it predicts "did not survive."
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ DECISION TREES ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D4E6F1;">🌳</div>
+    <div>
+      <div class="section-title">Part 2: Decision Trees — The "20 Questions" Algorithm</div>
+      <div class="section-subtitle">Entropy, Gini, Pruning, and how trees decide</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="analogy">
+      <strong>🎮 School Analogy:</strong> A decision tree is EXACTLY the game "20 Questions":<br><br>
+      "Is the passenger female?" → YES → 75% chance of survival!<br>
+      "Is the passenger in 1st class?" → YES → 90% chance!<br>
+      "Is the passenger's age > 50?" → Hmm, lower chance...<br><br>
+      Each question splits the data into purer and purer groups until you can make a prediction.
+    </div>
+
+    <h3 class="sub" style="color: var(--accent3);">How Does the Tree Choose Questions?</h3>
+    <p>The tree picks the question that creates the "purest" groups. Two ways to measure purity:</p>
+
+    <table class="nice-table">
+      <tr><th>Method</th><th>Idea</th><th>School Analogy</th></tr>
+      <tr><td><strong>Gini Impurity</strong></td><td>How likely you'd label a random item wrong</td><td>If a bag has 50% red and 50% blue marbles, Gini = 0.5 (max confusion). If 100% red, Gini = 0 (perfect purity).</td></tr>
+      <tr><td><strong>Entropy</strong></td><td>How "mixed up" or disordered a group is</td><td>A messy room has high entropy. A perfectly organized room has low entropy. Trees try to create low-entropy groups.</td></tr>
+    </table>
+
+    <h3 class="sub" style="color: var(--accent3);">Pruning — Don't Overthink It!</h3>
+    <div class="warning">
+      <strong>⚠️ The Problem:</strong> A tree with no limits will keep asking questions until every single training example is perfectly classified — that's <strong>overfitting</strong>! It memorizes the data instead of learning patterns.
+    </div>
+    <p><strong>Pruning</strong> is like telling the tree: "Stop asking questions after 3 levels" or "Don't split a group smaller than 10 items." The notebook tests different max_depth values and shows how too-deep trees overfit while too-shallow trees underfit.</p>
+
+    <div class="key-point">
+      <strong>💡 On Titanic:</strong> The Decision Tree achieved ~80% accuracy. The most important split? <strong>Sex</strong> — being female dramatically increased survival chances (the "women and children first" rule in action).
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ SVM ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#F5EEF8;">📏</div>
+    <div>
+      <div class="section-title">Part 3: Support Vector Machines (SVM) — Draw the Best Line</div>
+      <div class="section-subtitle">Margins, kernels, and the kernel trick</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="analogy">
+      <strong>🏟️ School Analogy:</strong> Imagine you're on a football field and two teams are standing in a jumble. Your job is to draw a line on the field that separates the two teams as cleanly as possible. But you don't just want ANY line — you want the line with the <strong>widest gap</strong> (margin) between the two closest players on each side. That wide gap means you're confident about the separation. That's SVM!
+    </div>
+
+    <h3 class="sub" style="color: var(--accent5);">Key Concepts</h3>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--accent5)">Concept</th><th style="background:var(--accent5)">What It Means</th><th style="background:var(--accent5)">School Version</th></tr>
+      <tr><td><strong>Hyperplane</strong></td><td>The dividing line (or surface) between classes</td><td>The chalk line on the field</td></tr>
+      <tr><td><strong>Margin</strong></td><td>The gap between the line and the nearest points on each side</td><td>How wide the "no man's land" is between teams</td></tr>
+      <tr><td><strong>Support Vectors</strong></td><td>The closest data points to the line — they "support" it</td><td>The front-row players on each team</td></tr>
+      <tr><td><strong>C parameter</strong></td><td>How much to punish misclassifications</td><td>Strict teacher (high C) vs. lenient teacher (low C)</td></tr>
+    </table>
+
+    <h3 class="sub" style="color: var(--accent5);">The Kernel Trick — When a Line Isn't Enough</h3>
+
+    <div class="analogy">
+      <strong>🍩 School Analogy:</strong> Imagine red dots in the center of a page and blue dots in a ring around them. No straight line can separate them! But if you could "lift" the points into 3D space (like pushing the center up), suddenly you CAN draw a flat plane between them. The <strong>kernel trick</strong> does this math without actually going to 3D. It's like looking at the data from a different angle.
+    </div>
+
+    <p>The notebook tests three kernels on moon-shaped data:</p>
+    <table class="nice-table">
+      <tr><th style="background:var(--accent5)">Kernel</th><th style="background:var(--accent5)">Boundary Shape</th><th style="background:var(--accent5)">Best For</th></tr>
+      <tr><td><strong>Linear</strong></td><td>Straight line</td><td>Simple, linearly separable data</td></tr>
+      <tr><td><strong>RBF (Gaussian)</strong></td><td>Curvy, flexible boundary</td><td>Most general — works on complex shapes</td></tr>
+      <tr><td><strong>Polynomial</strong></td><td>Curved based on degree</td><td>When you know the data has polynomial patterns</td></tr>
+    </table>
+
+    <div class="warning">
+      <strong>⚠️ Scaling Matters A LOT for SVM!</strong> Without scaling, the Wine dataset accuracy was much lower. With scaling, it jumped up significantly. SVM is very sensitive to feature scales because it relies on distances.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ ENSEMBLE METHODS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FEF9E7;">🌲</div>
+    <div>
+      <div class="section-title">Part 4: Ensemble Methods — Teamwork Makes the Dream Work</div>
+      <div class="section-subtitle">Random Forest, AdaBoost, Gradient Boosting, XGBoost</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Instead of relying on ONE model, ensemble methods combine <strong>many models</strong> together to get better results. It's the most powerful family of ML algorithms!</p>
+
+    <div class="analogy">
+      <strong>👥 School Analogy:</strong> Imagine you have a difficult exam question. Instead of asking just one student, you ask 100 students and go with the majority answer. Even if some students are wrong, the group answer is usually better than any single student. That's the power of ensembles!
+    </div>
+
+    <h3 class="sub" style="color: var(--accent4);">The Four Methods</h3>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--accent4)">Method</th><th style="background:var(--accent4)">How It Works</th><th style="background:var(--accent4)">School Analogy</th></tr>
+      <tr>
+        <td><strong>Random Forest</strong></td>
+        <td>Grows many decision trees, each trained on a random subset of data and features. Final answer = majority vote.</td>
+        <td>100 students each study a random chapter, take the test, and you pick the most popular answer. Each student sees different material, so their mistakes are different!</td>
+      </tr>
+      <tr>
+        <td><strong>AdaBoost</strong></td>
+        <td>Trains simple models one after another. Each new model focuses MORE on the examples the previous one got WRONG.</td>
+        <td>After each practice test, the teacher highlights the questions everyone got wrong. The next student studies THOSE extra hard. Each student corrects the previous one's mistakes.</td>
+      </tr>
+      <tr>
+        <td><strong>Gradient Boosting</strong></td>
+        <td>Like AdaBoost, but each new model directly predicts the ERRORS of the previous model.</td>
+        <td>First student guesses. Second student tries to predict the first student's mistakes. Third student predicts the remaining errors. They all add up to a great answer.</td>
+      </tr>
+      <tr>
+        <td><strong>XGBoost</strong></td>
+        <td>An optimized, faster, more regularized version of Gradient Boosting. Industry gold standard.</td>
+        <td>The same teamwork strategy, but with a genius student who does it faster and smarter with built-in anti-cheating (regularization).</td>
+      </tr>
+    </table>
+
+    <div class="key-point">
+      <strong>💡 Bagging vs. Boosting:</strong><br>
+      <strong>Bagging</strong> (Random Forest) = Train many models <em>independently in parallel</em>, then vote. Reduces <strong>variance</strong>.<br>
+      <strong>Boosting</strong> (AdaBoost, GB, XGBoost) = Train models <em>sequentially</em>, each fixing the last one's errors. Reduces <strong>bias</strong>.
+    </div>
+
+    <p>The notebook shows beautiful decision boundary plots for each method on moon-shaped data, plus feature importance charts, OOB (out-of-bag) scores, and calibration diagrams.</p>
+  </div></div>
+</div>
+
+<!-- ═══════════ PERFORMANCE EVALUATION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D5F5E3;">📊</div>
+    <div>
+      <div class="section-title">Part 5: Performance Evaluation — Grading Classification Models</div>
+      <div class="section-subtitle">Confusion Matrix, Precision, Recall, F1, ROC/AUC</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>For classification, "accuracy" alone is NOT enough. You need a whole toolkit of metrics.</p>
+
+    <h3 class="sub" style="color: var(--accent2);">The Confusion Matrix — The Master Report Card</h3>
+
+    <div class="analogy">
+      <strong>🏥 School Analogy:</strong> Imagine a doctor testing for a disease. There are 4 possible outcomes:
+    </div>
+
+    <div class="cm-grid">
+      <div class="cm-cell" style="background:#C8E6C9;"><strong>True Positive (TP)</strong><br>Has disease → Doctor says "YES"<br>✅ Correct alarm!</div>
+      <div class="cm-cell" style="background:#FFCDD2;"><strong>False Positive (FP)</strong><br>Healthy → Doctor says "YES"<br>😰 False alarm!</div>
+      <div class="cm-cell" style="background:#FFCDD2;"><strong>False Negative (FN)</strong><br>Has disease → Doctor says "NO"<br>💀 Missed it! DANGEROUS</div>
+      <div class="cm-cell" style="background:#C8E6C9;"><strong>True Negative (TN)</strong><br>Healthy → Doctor says "NO"<br>✅ Correct all-clear!</div>
+    </div>
+
+    <h3 class="sub" style="color: var(--accent2);">The Key Metrics</h3>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--accent2)">Metric</th><th style="background:var(--accent2)">Formula Idea</th><th style="background:var(--accent2)">When It Matters</th><th style="background:var(--accent2)">School Analogy</th></tr>
+      <tr>
+        <td><strong>Accuracy</strong></td>
+        <td>(TP + TN) / Total</td>
+        <td>When classes are balanced</td>
+        <td>% of all answers you got right</td>
+      </tr>
+      <tr>
+        <td><strong>Precision</strong></td>
+        <td>TP / (TP + FP)</td>
+        <td>When false alarms are costly</td>
+        <td>"Of everyone I ACCUSED of cheating, how many actually were?" Don't wrongly accuse innocent people!</td>
+      </tr>
+      <tr>
+        <td><strong>Recall</strong></td>
+        <td>TP / (TP + FN)</td>
+        <td>When missing cases is dangerous</td>
+        <td>"Of all ACTUAL cheaters, how many did I catch?" Don't let any escape!</td>
+      </tr>
+      <tr>
+        <td><strong>F1 Score</strong></td>
+        <td>Harmonic mean of Precision & Recall</td>
+        <td>When you need both</td>
+        <td>A balanced grade between "don't accuse innocents" AND "don't miss cheaters"</td>
+      </tr>
+    </table>
+
+    <h3 class="sub" style="color: var(--accent2);">ROC Curve & AUC</h3>
+
+    <div class="analogy">
+      <strong>📈 School Analogy:</strong> The <strong>ROC curve</strong> shows the tradeoff between catching true positives and creating false alarms at every possible threshold. The <strong>AUC</strong> (Area Under the Curve) is a single number from 0 to 1:
+      <br><br>
+      AUC = 1.0 → Perfect classifier (catches everything, no false alarms)<br>
+      AUC = 0.5 → Random guessing (the diagonal line — useless)<br>
+      AUC < 0.5 → Worse than random (your model is anti-learning!)
+    </div>
+
+    <div class="info-box">
+      <strong>📌 Precision-Recall Curve:</strong> The notebook also plots Precision vs. Recall curves, which are better than ROC when classes are very imbalanced (like detecting rare diseases). It measures how well you find the minority class.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ CLASS IMBALANCE ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FADBD8;">⚖️</div>
+    <div>
+      <div class="section-title">Part 6: Class Imbalance — When 90% of Answers Are the Same</div>
+      <div class="section-subtitle">SMOTE, Class Weights, Balanced Random Forest</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Imagine a class where 90 students pass and 10 fail. A lazy model could just predict "PASS" for everyone and be 90% accurate! But it would miss ALL the failures — the very thing we care about. That's the class imbalance problem.
+    </div>
+
+    <p>The notebook creates a dataset with <strong>90% class 0 and only 10% class 1</strong>, then shows three ways to fix it:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--accent1)">Method</th><th style="background:var(--accent1)">How It Works</th><th style="background:var(--accent1)">School Analogy</th><th style="background:var(--accent1)">Result</th></tr>
+      <tr>
+        <td><strong>Class Weights</strong></td>
+        <td>Tell the model: "Penalize mistakes on the rare class MORE"</td>
+        <td>Teacher says: "Getting a rare question wrong costs 9x more than a common question"</td>
+        <td>97% accuracy, 100% recall on minority</td>
+      </tr>
+      <tr>
+        <td><strong>SMOTE</strong></td>
+        <td>Create synthetic (fake but realistic) copies of the rare class</td>
+        <td>Like photocopying the 10 failing students' profiles to make 90 copies, so now the class is balanced</td>
+        <td>97% accuracy, 100% recall</td>
+      </tr>
+      <tr>
+        <td><strong>Balanced Random Forest</strong></td>
+        <td>Random Forest with built-in class weights</td>
+        <td>Each tree in the forest automatically pays more attention to the rare class</td>
+        <td>99% accuracy, 95% recall — BEST!</td>
+      </tr>
+    </table>
+
+    <div class="key-point">
+      <strong>💡 Key Insight:</strong> All three methods massively improved recall on the minority class (from near-zero to 95-100%). The Balanced Random Forest performed best overall. The lesson: ALWAYS check for class imbalance before training!
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ REAL-WORLD PROJECT ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D4E6F1;">💳</div>
+    <div>
+      <div class="section-title">Part 7: Real-World Project — German Credit Risk</div>
+      <div class="section-subtitle">Comparing 4 models on a tough, messy dataset</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>The final project uses the <strong>German Credit dataset</strong> — a real-world dataset where banks predict whether someone is a <strong>good or bad credit risk</strong>. It has mixed numeric and categorical features and is deliberately hard — no model gets perfect accuracy.</p>
+
+    <p>Four models go head-to-head:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--accent3)">Model</th><th style="background:var(--accent3)">What It Is</th></tr>
+      <tr><td><strong>Logistic Regression</strong></td><td>Simple, interpretable probability model</td></tr>
+      <tr><td><strong>Decision Tree</strong></td><td>Ask yes/no questions to classify</td></tr>
+      <tr><td><strong>SVM</strong></td><td>Find the widest-margin boundary</td></tr>
+      <tr><td><strong>Random Forest</strong></td><td>Ensemble of many trees voting together</td></tr>
+    </table>
+
+    <p>Each model is wrapped in a <strong>pipeline</strong> that handles preprocessing (scaling numbers, encoding categories) automatically. They're compared on accuracy, precision, recall, F1-score, ROC-AUC, and training time.</p>
+
+    <div class="analogy">
+      <strong>💰 Real-World Stakes:</strong> In credit risk, a <strong>False Negative</strong> (predicting "good credit" for someone who defaults) costs the bank real money. A <strong>False Positive</strong> (rejecting a good customer) just loses potential profit. So recall (catching all bad risks) matters more than precision here.
+    </div>
+
+    <div class="info-box">
+      <strong>📌 Discussion Points from the Notebook:</strong> Which model had the highest F1? Was it the same as the one with highest accuracy? How did precision vs. recall trade off? How long did each model take to train? These are the real questions data scientists ask when choosing a model for production.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ SUMMARY ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D5F5E3;">🎓</div>
+    <div>
+      <div class="section-title">Summary — Everything You Learned!</div>
+      <div class="section-subtitle">The complete cheat sheet for classification</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="summary-grid">
+      <div class="summary-card" style="background:linear-gradient(135deg,#2ECC71,#27AE60);">
+        <h4>Logistic Regression</h4>
+        <p>Sigmoid converts scores to probabilities. Simple, fast, good baseline. Works great on linearly separable data.</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#3498DB,#2980B9);">
+        <h4>Decision Trees</h4>
+        <p>"20 Questions" algorithm. Easy to understand and visualize. Prune to prevent overfitting.</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#9B59B6,#8E44AD);">
+        <h4>SVMs</h4>
+        <p>Find the widest margin. Kernel trick for non-linear data. ALWAYS scale features first!</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#F39C12,#E67E22);">
+        <h4>Ensembles</h4>
+        <p>Random Forest (many trees vote). Boosting (each model fixes the last). XGBoost = industry champion.</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#E74C3C,#C0392B);">
+        <h4>Metrics</h4>
+        <p>Accuracy isn't enough! Use Precision (don't wrongly accuse), Recall (don't miss any), F1, and ROC-AUC.</p>
+      </div>
+      <div class="summary-card" style="background:linear-gradient(135deg,#1ABC9C,#16A085);">
+        <h4>Class Imbalance</h4>
+        <p>90/10 splits fool simple accuracy. Fix with SMOTE, class weights, or balanced ensembles.</p>
+      </div>
+    </div>
+
+    <div class="key-point" style="margin-top:20px;">
+      <strong>🎯 The #1 Takeaway:</strong> Classification is not just about getting the right answer — it's about understanding WHICH TYPE of mistakes matter more for your problem. In cancer detection, missing a tumor (low recall) is far worse than a false alarm (low precision). Always pick your metrics based on the real-world consequences!
+    </div>
+
+    <div style="background:#F5F5F5;border-radius:14px;padding:18px;margin-top:16px;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">🗺️ The Full Journey So Far:</h4>
+      <p><strong>Part 1:</strong> ML basics — supervised, unsupervised, reinforcement learning, preprocessing<br>
+      <strong>Part 2:</strong> Regression deep dive — linear, polynomial, metrics, cross-validation, bias-variance, regularization<br>
+      <strong>Part 3:</strong> Classification mastery — logistic regression, trees, SVM, ensembles, evaluation metrics, class imbalance<br><br>
+      You now have a solid foundation in all the core ML algorithms! 🎉</p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>

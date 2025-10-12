@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 6: Generative AI & Large Language Models — Explained!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F0F2F5;--card:#FFF;--gen:#8B5CF6;--diff:#EC4899;--llm:#3B82F6;--tts:#10B981;--sr:#F59E0B;--text:#1E293B;--text-light:#64748B;--shadow:0 4px 24px rgba(139,92,246,.08);--radius:18px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#8B5CF6 0%,#EC4899 40%,#3B82F6 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23ffffff' fill-opacity='0.06'/%3E%3C/svg%3E")}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(1.8rem,5vw,3rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero p{color:rgba(255,255,255,.85);font-size:1.1rem;max-width:700px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.18rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text-light);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text-light)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:18000px}
+  .section-content{padding:0 26px 26px}
+
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid #E67E22;border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:#E67E22}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid #27AE60;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:#27AE60}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid #E74C3C;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:#E74C3C}
+  .info-box{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-left:4px solid var(--llm);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:var(--llm)}
+  .purple-box{background:linear-gradient(135deg,#F3E8FF,#EDE9FE);border-left:4px solid var(--gen);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .purple-box strong{color:var(--gen)}
+
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.86rem}
+  .nice-table th{padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500;color:#fff}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:nth-child(even) td{background:#fafafa}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+
+  .flow{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:16px 0;justify-content:center}
+  .flow-box{color:#fff;padding:8px 14px;border-radius:10px;font-size:.73rem;font-weight:500;text-align:center;min-width:70px}
+  .flow-arrow{font-size:1rem;color:#94A3B8}
+
+  .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+  .vs-card{border-radius:14px;padding:18px;border:2px solid}
+  .vs-card h4{font-family:'Fredoka',sans-serif;font-size:.95rem;margin-bottom:6px}
+  .vs-card p{font-size:.83rem;color:var(--text-light);line-height:1.5}
+  @media(max-width:600px){.vs-grid{grid-template-columns:1fr}}
+
+  .param-row{display:flex;align-items:center;gap:8px;margin:8px 0;flex-wrap:wrap}
+  .param-label{font-weight:600;font-size:.8rem;min-width:80px}
+  .param-bar{flex:1;height:22px;background:#f0f0f0;border-radius:6px;overflow:hidden;position:relative;min-width:150px}
+  .param-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:600;color:#fff}
+  .param-desc{font-size:.75rem;color:var(--text-light)}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🤖 Generative AI & Large Language Models</h1>
+  <p>Part 6 enters the era of generative AI — Stable Diffusion, Transformer architecture, LLM text generation, text-to-speech, and image super-resolution. The theory behind ChatGPT, DALL-E, and beyond.</p>
+</div>
+
+<div class="container">
+
+<!-- ═══════════ BIG PICTURE ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#F3E8FF;">🗺️</div>
+    <div>
+      <div class="section-title">The Big Picture — From Classification to Creation</div>
+      <div class="section-subtitle">5 sections covering the full generative AI landscape</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>Parts 1–5 were about <strong>understanding</strong> data — classify this image, predict this price, detect this object. Part 6 flips the script: now models <strong>create</strong> new content — images from text, text from prompts, speech from words, and high-res images from low-res ones.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--gen);">🧠 GenAI<br>Fundamentals</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--diff);">🎨 Stable<br>Diffusion</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--llm);">💬 LLMs &<br>Transformers</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--tts);">🔊 Text-to-<br>Audio</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--sr);">🔍 Super-<br>Resolution</div>
+    </div>
+
+    <div class="vs-grid">
+      <div class="vs-card" style="border-color:#94A3B8;background:rgba(148,163,184,.04)">
+        <h4 style="color:#64748B;">Parts 1–5: Discriminative</h4>
+        <p>Input: data → Output: label/prediction<br>Goal: model P(Y|X)<br>Example: "This image is a cat"</p>
+      </div>
+      <div class="vs-card" style="border-color:var(--gen);background:rgba(139,92,246,.04)">
+        <h4 style="color:var(--gen);">Part 6: Generative</h4>
+        <p>Input: noise + condition → Output: new content<br>Goal: model P(X) or P(X|Z)<br>Example: "Generate a painting of a cat"</p>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 1: FUNDAMENTALS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#F3E8FF;">🧠</div>
+    <div>
+      <div class="section-title">Part 1: Generative AI Fundamentals</div>
+      <div class="section-subtitle">Latent space, embeddings, and probability distributions</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <p>Three core concepts underpin all generative models:</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--gen)">Concept</th><th style="background:var(--gen)">What It Is</th><th style="background:var(--gen)">Example</th></tr>
+      <tr><td><strong>Latent Space</strong></td><td>A compressed, lower-dimensional representation that captures the essential features of the data</td><td>A 512×512 image → 64×64 latent (48× compression)</td></tr>
+      <tr><td><strong>Embeddings</strong></td><td>Dense vector representations where similar concepts are close together in space</td><td>"cat" and "dog" vectors are close; "cat" and "airplane" are far apart</td></tr>
+      <tr><td><strong>Probability Distributions</strong></td><td>Generative models learn the distribution of data, then sample from it to create new examples</td><td>Sampling from the "face distribution" creates new, realistic faces</td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> <strong>Latent space</strong> is like a map of a city — it's much smaller than the actual city but still captures where everything is relative to everything else. <strong>Embeddings</strong> are like placing every word in a classroom — synonyms sit near each other, antonyms sit far apart. <strong>Sampling</strong> is like randomly pointing at the map and building whatever's at that location.
+    </div>
+
+    <div class="key-point">
+      <strong>💡 Key Insight:</strong> Similar concepts cluster together in latent space, and you can smoothly <strong>interpolate</strong> between them. Moving gradually between the latent code for "cat" and "dog" produces images that look like cat-dog hybrids — this wouldn't be possible in pixel space!
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 2: STABLE DIFFUSION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FCE7F3;">🎨</div>
+    <div>
+      <div class="section-title">Part 2: Stable Diffusion — Text to Image</div>
+      <div class="section-subtitle">Forward/reverse diffusion, CLIP, U-Net, VAE</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <h3 class="sub" style="color:var(--diff);">The Core Idea: Destroy, Then Reconstruct</h3>
+    <p>Diffusion models work by learning to <strong>reverse the process of adding noise</strong>. During training, you gradually destroy an image by adding noise step-by-step. The model learns to reverse each step — so at generation time, you start with pure noise and denoise it into a coherent image.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--tts);">🖼️ Clean<br>Image</div>
+      <span class="flow-arrow">→ +noise →</span>
+      <div class="flow-box" style="background:#94A3B8;">🌫️ Noisy</div>
+      <span class="flow-arrow">→ +noise →</span>
+      <div class="flow-box" style="background:#475569;">📺 Pure<br>Noise</div>
+    </div>
+    <p style="text-align:center;font-size:.8rem;color:var(--text-light);">▲ Forward Diffusion (Training) — destroy the image</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:#475569;">📺 Pure<br>Noise</div>
+      <span class="flow-arrow">→ denoise →</span>
+      <div class="flow-box" style="background:#94A3B8;">🌫️ Cleaner</div>
+      <span class="flow-arrow">→ denoise →</span>
+      <div class="flow-box" style="background:var(--diff);">🖼️ Generated<br>Image!</div>
+    </div>
+    <p style="text-align:center;font-size:.8rem;color:var(--text-light);">▲ Reverse Diffusion (Generation) — reconstruct from noise</p>
+
+    <h3 class="sub" style="color:var(--diff);">The 3 Components of Stable Diffusion</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--diff)">Component</th><th style="background:var(--diff)">Role</th><th style="background:var(--diff)">Details</th></tr>
+      <tr><td><strong>1. CLIP Text Encoder</strong></td><td>Understands your text prompt</td><td>"A cat on a beach" → 77 tokens × 768 dimensions</td></tr>
+      <tr><td><strong>2. U-Net Denoiser</strong></td><td>The brain — removes noise step by step, guided by the text</td><td>860M–2.6B parameters. Uses cross-attention to link text ↔ image</td></tr>
+      <tr><td><strong>3. VAE (Decoder)</strong></td><td>Expands the latent result back to a full image</td><td>64×64×4 latent → 512×512×3 pixel image</td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Imagine you're restoring a damaged painting. The <strong>CLIP encoder</strong> is like reading the description of what the painting should look like. The <strong>U-Net</strong> is the restorer who carefully removes damage layer by layer, constantly checking the description. The <strong>VAE decoder</strong> is like putting the final coat of varnish and framing it at full size.
+    </div>
+
+    <h3 class="sub" style="color:var(--diff);">Key Parameters You Can Tune</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--diff)">Parameter</th><th style="background:var(--diff)">What It Controls</th><th style="background:var(--diff)">Sweet Spot</th></tr>
+      <tr><td><strong>CFG Scale</strong></td><td>How closely the image follows your prompt. Low = creative, high = precise but may have artifacts</td><td>7–10</td></tr>
+      <tr><td><strong>Steps</strong></td><td>How many denoising iterations. More = better quality but slower</td><td>20–30</td></tr>
+      <tr><td><strong>Sampler</strong></td><td>The algorithm for denoising (PNDM, DDIM, DPM)</td><td>DPM++ 2M Karras</td></tr>
+    </table>
+
+    <div class="info-box">
+      <strong>📌 Why "Latent" Diffusion?</strong> Stable Diffusion works in a compressed 64×64 latent space, NOT the full 512×512 pixel space. This is 48× more efficient — which is why it can run on consumer GPUs instead of requiring a data center!
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 3: LLMs ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#DBEAFE;">💬</div>
+    <div>
+      <div class="section-title">Part 3: Large Language Models & Transformers</div>
+      <div class="section-subtitle">Self-attention, Q/K/V, tokenization, autoregressive generation, sampling</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <h3 class="sub" style="color:var(--llm);">The Transformer — The Architecture Behind Everything</h3>
+    <p>Published in 2017 ("Attention Is All You Need"), the Transformer replaced RNNs with <strong>self-attention</strong> — enabling parallel processing and capturing long-range dependencies. It powers ChatGPT, BERT, Stable Diffusion's text encoder, and modern TTS systems.</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--llm)">Transformer Type</th><th style="background:var(--llm)">Architecture</th><th style="background:var(--llm)">Best For</th><th style="background:var(--llm)">Examples</th></tr>
+      <tr><td><strong>Encoder-only</strong></td><td>Bidirectional — sees all tokens</td><td>Understanding tasks (classification, NER)</td><td>BERT, RoBERTa</td></tr>
+      <tr><td><strong>Decoder-only</strong></td><td>Causal — sees only past tokens</td><td>Generation tasks (text, code)</td><td>GPT, LLaMA, Claude</td></tr>
+      <tr><td><strong>Encoder-Decoder</strong></td><td>Both</td><td>Seq-to-seq (translation, summarization)</td><td>T5, BART</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--llm);">Self-Attention: Query, Key, Value</h3>
+    <p>The core mechanism that makes Transformers work. For each word, the model computes:</p>
+
+    <div class="purple-box">
+      <strong>📐 The Attention Formula:</strong><br>
+      <code style="font-size:.9rem;">Attention(Q, K, V) = softmax(Q × K<sup>T</sup> / √d<sub>k</sub>) × V</code><br><br>
+      <strong>Query (Q):</strong> "What am I looking for?"<br>
+      <strong>Key (K):</strong> "What do I contain?"<br>
+      <strong>Value (V):</strong> "What do I output?"<br><br>
+      Multiply Q×K to get similarity scores → softmax to get attention weights → multiply by V to get the weighted output.
+    </div>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Imagine you're in a library (the sentence). You have a <strong>question</strong> (Query). Each book has a <strong>title on the spine</strong> (Key). You compare your question to each title to decide which books are relevant (attention weights). Then you read the <strong>content</strong> (Value) of the relevant books. Multi-head attention is like sending 8 students to the library, each looking for different types of information!
+    </div>
+
+    <h3 class="sub" style="color:var(--llm);">Tokenization: Text → Numbers</h3>
+    <div class="flow">
+      <div class="flow-box" style="background:var(--llm);">📝 "unhappiness"</div>
+      <span class="flow-arrow">→ tokenize →</span>
+      <div class="flow-box" style="background:var(--gen);">["un", "happiness"]</div>
+      <span class="flow-arrow">→ IDs →</span>
+      <div class="flow-box" style="background:#475569;">[4521, 18903]</div>
+      <span class="flow-arrow">→ embed →</span>
+      <div class="flow-box" style="background:var(--diff);">768-dim vectors<br>+ position</div>
+    </div>
+
+    <p>LLMs use <strong>BPE (Byte-Pair Encoding)</strong> or SentencePiece to split text into subword tokens (~50,000 vocabulary). This handles unseen words by breaking them into known pieces.</p>
+
+    <h3 class="sub" style="color:var(--llm);">Autoregressive Generation: One Token at a Time</h3>
+    <div class="flow">
+      <div class="flow-box" style="background:var(--llm);">Input:<br>"The cat"</div>
+      <span class="flow-arrow">→ predict →</span>
+      <div class="flow-box" style="background:var(--gen);">Next token:<br>"sat" (82%)</div>
+      <span class="flow-arrow">→ append →</span>
+      <div class="flow-box" style="background:var(--llm);">Input:<br>"The cat sat"</div>
+      <span class="flow-arrow">→ predict →</span>
+      <div class="flow-box" style="background:var(--gen);">Next token:<br>"on" (91%)</div>
+      <span class="flow-arrow">→ ...</span>
+    </div>
+    <p>Each token is predicted one at a time, appended to the input, and fed back in. This continues until an end-of-sequence token or the max length is reached. <strong>Causal masking</strong> ensures the model can only see past tokens, never future ones.</p>
+
+    <h3 class="sub" style="color:var(--llm);">Sampling Strategies — Controlling Creativity</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--llm)">Strategy</th><th style="background:var(--llm)">How It Works</th><th style="background:var(--llm)">Effect</th></tr>
+      <tr><td><strong>Greedy</strong></td><td>Always pick the highest-probability token</td><td>Deterministic, repetitive, boring</td></tr>
+      <tr><td><strong>Temperature</strong></td><td>T&lt;1 sharpens probs (focused), T&gt;1 flattens them (random)</td><td>T=0.7 is common for balanced output</td></tr>
+      <tr><td><strong>Top-k</strong></td><td>Only consider the top k most likely tokens (e.g., k=50)</td><td>Filters out unlikely garbage tokens</td></tr>
+      <tr><td><strong>Top-p (Nucleus)</strong></td><td>Consider tokens until cumulative probability ≥ p (e.g., p=0.9)</td><td>Dynamic vocabulary — best quality in most cases</td></tr>
+      <tr><td><strong>Repetition Penalty</strong></td><td>Reduce probability of already-used tokens (1.1–1.2×)</td><td>Prevents "the the the the..."</td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> <strong>Temperature</strong> is like an exam difficulty dial. T=0.1 means you MUST give the textbook answer (safe but boring). T=1.5 means you're encouraged to be creative and take risks (interesting but sometimes wrong). <strong>Top-p</strong> is like saying "only consider answers that are at least somewhat reasonable" — ignoring the truly wild options.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 4: TTS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D1FAE5;">🔊</div>
+    <div>
+      <div class="section-title">Part 4: Text-to-Audio (Speech Synthesis)</div>
+      <div class="section-subtitle">TTS pipeline, Bark, MMS-TTS</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <h3 class="sub" style="color:var(--tts);">The TTS Pipeline</h3>
+    <div class="flow">
+      <div class="flow-box" style="background:var(--tts);">📝 Text</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--llm);">🔤 Text Encoder<br>(tokenize + embed + phonemes)</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--gen);">📊 Acoustic Model<br>(→ mel-spectrogram)</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--diff);">🔊 Vocoder<br>(→ audio waveform)</div>
+    </div>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--tts)">Model</th><th style="background:var(--tts)">Highlights</th><th style="background:var(--tts)">Languages</th><th style="background:var(--tts)">Size</th></tr>
+      <tr><td><strong>Bark</strong></td><td>Transformer-based. Supports music, sound effects, emotions, speaker cloning</td><td>13</td><td>1–3 GB</td></tr>
+      <tr><td><strong>MMS-TTS (Meta)</strong></td><td>Massively Multilingual Speech. Character-based, fast generation</td><td><strong>1,100+</strong></td><td>800 MB</td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> The TTS pipeline is like putting on a play. The <strong>text encoder</strong> reads the script and figures out pronunciation. The <strong>acoustic model</strong> is the director who decides pacing, pitch, and emotion. The <strong>vocoder</strong> is the actor who actually speaks the lines with a real-sounding voice.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ PART 5: SUPER RESOLUTION ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FEF3C7;">🔍</div>
+    <div>
+      <div class="section-title">Part 5: Image Super-Resolution</div>
+      <div class="section-subtitle">Real-ESRGAN, RRDB architecture, PSNR/SSIM metrics</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="vs-grid">
+      <div class="vs-card" style="border-color:#94A3B8;background:rgba(148,163,184,.04)">
+        <h4 style="color:#64748B;">Traditional (Bicubic)</h4>
+        <p>Simple interpolation. Blurry, no new detail added. Fast but low quality.</p>
+      </div>
+      <div class="vs-card" style="border-color:var(--sr);background:rgba(245,158,11,.04)">
+        <h4 style="color:var(--sr);">Neural Super-Resolution</h4>
+        <p>Learns to <strong>hallucinate</strong> realistic detail. Sharp textures, plausible features. Slower but stunning results.</p>
+      </div>
+    </div>
+
+    <h3 class="sub" style="color:var(--sr);">Real-ESRGAN Architecture (RRDB)</h3>
+    <p>The <strong>Residual in Residual Dense Block</strong> architecture powers Real-ESRGAN:</p>
+    <table class="nice-table">
+      <tr><th style="background:var(--sr)">Component</th><th style="background:var(--sr)">What It Does</th></tr>
+      <tr><td><strong>Residual Dense Blocks</strong></td><td>Multiple conv layers with dense connections — every layer receives input from ALL previous layers for maximum feature reuse</td></tr>
+      <tr><td><strong>Residual Connections</strong></td><td>Local (within each block) + Global (across network) — enables 23+ layers deep</td></tr>
+      <tr><td><strong>PixelShuffle Upsampling</strong></td><td>Learnable upsampling: 2× → 4× via two PixelShuffle layers (sub-pixel convolution)</td></tr>
+      <tr><td><strong>GAN Training</strong></td><td>Perceptual loss produces more realistic textures vs pixel-level loss alone</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--sr);">Quality Metrics</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--sr)">Metric</th><th style="background:var(--sr)">What It Measures</th><th style="background:var(--sr)">Good Score</th></tr>
+      <tr><td><strong>PSNR</strong> (Peak Signal-to-Noise Ratio)</td><td>Pixel-level accuracy (dB)</td><td>28–32 dB very good, 32+ excellent</td></tr>
+      <tr><td><strong>SSIM</strong> (Structural Similarity)</td><td>Perceptual quality (correlates better with human judgment)</td><td>0.8+ good, 0.9+ excellent</td></tr>
+    </table>
+
+    <div class="analogy">
+      <strong>🏫 School Analogy:</strong> Traditional upscaling is like zooming in on a photo — everything gets blurry. Neural super-resolution is like an artist who looks at the blurry image and <em>paints in</em> what the details SHOULD look like, based on having studied millions of high-res photos. It's "hallucinating" detail, but the hallucinations are educated guesses.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ UNIFIED CONCEPTS ═══════════ -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E0E7FF;">🔗</div>
+    <div>
+      <div class="section-title">The Unifying Thread — Attention Is All You Need</div>
+      <div class="section-subtitle">How transformers, latent spaces, and attention connect everything</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <table class="nice-table">
+      <tr><th style="background:#475569">Concept</th><th style="background:#475569">Stable Diffusion</th><th style="background:#475569">LLMs</th><th style="background:#475569">TTS</th><th style="background:#475569">Super-Res</th></tr>
+      <tr><td><strong>Attention</strong></td><td>Cross-attention (text→image)</td><td>Self-attention (within text)</td><td>Both types</td><td>—</td></tr>
+      <tr><td><strong>Latent Space</strong></td><td>64×64×4 latent</td><td>Token embeddings (768–4096D)</td><td>Mel-spectrograms</td><td>Feature maps</td></tr>
+      <tr><td><strong>Generation</strong></td><td>Iterative denoising (20–50 steps)</td><td>Autoregressive (1 token/step)</td><td>Seq-to-seq</td><td>Single-pass</td></tr>
+      <tr><td><strong>Core Arch.</strong></td><td>U-Net + Transformer</td><td>Transformer (decoder)</td><td>Transformer</td><td>RRDB (CNN)</td></tr>
+    </table>
+
+    <div class="key-point">
+      <strong>💡 The Big Realization:</strong> Transformers and attention mechanisms are the shared foundation across <em>all</em> modern generative AI — text, images, and audio. The <strong>self-attention</strong> in LLMs, the <strong>cross-attention</strong> in Stable Diffusion, and the <strong>both</strong> in TTS all come from the same 2017 "Attention Is All You Need" paper.
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════ SUMMARY ═══════════ -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div>
+      <div class="section-title">Summary — What You Learned!</div>
+    </div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #1 — Generative ≠ Discriminative.</strong> Parts 1–5 learned P(Y|X) — predict labels from data. Part 6 learns P(X) — model the data distribution itself and sample from it to create new content.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #2 — Diffusion = Destroy + Reconstruct.</strong> Stable Diffusion learns to reverse noise addition. The CLIP encoder understands your text, the U-Net denoises guided by it, and the VAE decoder reconstructs the full image. Latent space makes it 48× more efficient.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #3 — Transformers Are Everything.</strong> Self-attention (Q, K, V) enables parallel processing and long-range dependencies. LLMs use decoder-only transformers, generating text one token at a time autoregressively.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #4 — Sampling Controls Creativity.</strong> Temperature, Top-k, and Top-p let you tune the randomness-quality tradeoff. Low temp = safe and focused. High temp = creative but risky. Top-p = best default.
+    </div>
+
+    <div class="key-point">
+      <strong>🎯 Takeaway #5 — AI Creates Across Modalities.</strong> Text→Image (Stable Diffusion), Text→Text (LLMs), Text→Audio (Bark/MMS-TTS), LowRes→HiRes (Real-ESRGAN). All built on attention, latent spaces, and large-scale training.
+    </div>
+
+    <div style="background:linear-gradient(135deg,#8B5CF6,#EC4899,#3B82F6);border-radius:14px;padding:20px;margin-top:16px;color:#fff;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">🏁 The Complete Course Journey:</h4>
+      <p style="opacity:.92;font-size:.88rem;">
+      <strong>Part 1:</strong> ML fundamentals & preprocessing<br>
+      <strong>Part 2:</strong> Regression deep dive<br>
+      <strong>Part 3:</strong> Classification & ensembles<br>
+      <strong>Part 4:</strong> Neural networks, basic CNNs, RNNs<br>
+      <strong>Part 5:</strong> Advanced CNNs, transfer learning, YOLO<br>
+      <strong>Part 6:</strong> Generative AI, LLMs, Diffusion, TTS, Super-Resolution 🆕<br><br>
+      From linear regression to generating images from text — that's the full spectrum of modern ML! 🎉
+      </p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>

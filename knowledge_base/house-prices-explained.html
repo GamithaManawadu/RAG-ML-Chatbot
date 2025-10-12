@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>House Price Prediction (Kaggle) Explained!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F0F2F5;--card:#FFF;--lin:#3B82F6;--tree:#10B981;--ens:#8B5CF6;--feat:#F59E0B;--text:#1E293B;--text2:#64748B;--shadow:0 4px 24px rgba(59,130,246,.08);--radius:18px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#1E40AF 0%,#10B981 50%,#F59E0B 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23ffffff' fill-opacity='0.06'/%3E%3C/svg%3E")}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(1.8rem,5vw,3rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero p{color:rgba(255,255,255,.85);font-size:1.05rem;max-width:680px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.18rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text2);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text2)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:none}
+  .section-content{padding:0 26px 26px}
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid #E67E22;border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:#E67E22}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid #27AE60;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:#27AE60}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid #E74C3C;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:#E74C3C}
+  .info-box{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-left:4px solid var(--lin);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:var(--lin)}
+  .purple-box{background:linear-gradient(135deg,#F3E8FF,#EDE9FE);border-left:4px solid var(--ens);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .purple-box strong{color:var(--ens)}
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.86rem}
+  .nice-table th{padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500;color:#fff}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:last-child td{border-bottom:none}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+  .flow{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:16px 0;justify-content:center}
+  .flow-box{color:#fff;padding:8px 14px;border-radius:10px;font-size:.73rem;font-weight:500;text-align:center;min-width:70px}
+  .flow-arrow{font-size:1rem;color:#94A3B8}
+  .bar-visual{margin:14px 0}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .bar-label{width:120px;font-weight:600;font-size:.78rem;text-align:right;flex-shrink:0}
+  .bar-track{flex:1;height:30px;background:#f0f0f0;border-radius:8px;overflow:hidden;position:relative}
+  .bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-weight:600;color:#fff;font-size:.78rem}
+  .nb-img{width:100%;max-width:100%;height:auto;display:block;border-radius:12px;margin:14px 0;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1px solid #e2e8f0}
+  .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+  .vs-card{border-radius:14px;padding:18px;border:2px solid}
+  .vs-card h4{font-family:'Fredoka',sans-serif;font-size:.95rem;margin-bottom:6px}
+  .vs-card p{font-size:.83rem;color:var(--text2);line-height:1.5}
+  @media(max-width:600px){.vs-grid{grid-template-columns:1fr}.bar-label{width:90px;font-size:.7rem}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🏠 House Price Prediction Kaggle</h1>
+  <p>Predicting house sale prices using feature engineering, 6 regression models, and a weighted ensemble with a real Kaggle leaderboard score.</p>
+</div>
+
+<div class="container">
+
+<!-- BIG PICTURE -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#DBEAFE;">🗺️</div>
+    <div><div class="section-title">What's This Project About?</div><div class="section-subtitle">79 features, 1,460 houses, and a Kaggle leaderboard score</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>Given 79 features about a house (size, quality, age, neighbourhood, garage, pool, etc.), can we predict its sale price? This is the classic <strong>Kaggle "House Prices: Advanced Regression Techniques"</strong> competition.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--feat);">79 Raw<br>Features</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:#E67E22;">EDA +<br>Cleaning</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--feat);">Engineer<br>11 New Features</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--lin);">Train 6<br>Models</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--ens);">Weighted<br>Ensemble</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--tree);">Kaggle<br>Submission</div>
+    </div>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--lin);">Model</th><th style="background:var(--lin);">Type</th><th style="background:var(--lin);">CV RMSE</th></tr>
+      <tr><td><strong>Lasso</strong></td><td>Linear (L1)</td><td><strong>0.1141 ⭐</strong></td></tr>
+      <tr><td>ElasticNet</td><td>Linear (L1+L2)</td><td>0.1143</td></tr>
+      <tr><td>Ridge</td><td>Linear (L2)</td><td>0.1147</td></tr>
+      <tr><td>GBR</td><td>Gradient Boosting</td><td>0.1158</td></tr>
+      <tr><td>XGBoost</td><td>Gradient Boosting</td><td>0.1187</td></tr>
+      <tr><td>LightGBM</td><td>Gradient Boosting</td><td>0.1201</td></tr>
+      <tr><td><strong>Ensemble</strong></td><td>Weighted Average</td><td><strong>Best combined</strong></td></tr>
+    </table>
+
+    <div class="analogy"><strong>🏫 School Analogy:</strong> Predicting house prices is like appraising a used car. You consider the brand (neighbourhood), age (year built), mileage (condition), engine size (square footage), and extras (pool, garage). Each feature adds or subtracts value, and the best prediction comes from weighing all factors together, not just looking at one.</div>
+  </div></div>
+</div>
+
+<!-- LOG TRANSFORM -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FEF3C7;">📐</div>
+    <div><div class="section-title">The #1 Trick - Log Transform the Target</div><div class="section-subtitle">Reduces skewness from 1.9 to 0.12 : the single biggest improvement</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>House prices are heavily <strong>right-skewed</strong> most houses cost $100K–$200K, but a few mansions cost $500K+. This skew makes linear models perform poorly because they try to minimise squared errors, and the expensive outliers dominate.</p>
+
+    <p>Applying <code>log1p(SalePrice)</code> transforms the distribution to near-normal (skewness: 1.9 → 0.12). This is the single biggest accuracy improvement in the entire notebook, and the same technique was applied to 38 other skewed numerical features.</p>
+
+    <div class="analogy"><strong>🏫 School Analogy:</strong> Imagine grading students where most score 60–80 but a few score 1000. The average gets pulled way up by those outliers. Log transform is like switching to a percentage scale, it compresses the extremes and makes the distribution fair for everyone.</div>
+
+    <div class="key-point"><strong>💡 Key Detail:</strong> All predictions are made in log space, then converted back to dollars using <code>np.expm1()</code> (the inverse of log1p). This means the model predicts <em>proportional</em> errors, not absolute dollar errors: a 10% error on a $100K house ($10K) is treated the same as a 10% error on a $500K house ($50K).</div>
+  </div></div>
+</div>
+
+<!-- EDA -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#DBEAFE;">📊</div>
+    <div><div class="section-title">EDA — What Drives House Prices?</div><div class="section-subtitle">Top correlations, missing values, outlier removal</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <h3 class="sub" style="color:var(--lin);">Top 10 Correlated Features</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--lin);">Feature</th><th style="background:var(--lin);">Correlation</th><th style="background:var(--lin);">What It Measures</th></tr>
+      <tr><td><strong>OverallQual</strong></td><td><strong>0.791</strong></td><td>Overall material and finish quality (1–10)</td></tr>
+      <tr><td><strong>GrLivArea</strong></td><td><strong>0.709</strong></td><td>Above-ground living area (sq ft)</td></tr>
+      <tr><td>GarageCars</td><td>0.640</td><td>Garage capacity (number of cars)</td></tr>
+      <tr><td>GarageArea</td><td>0.623</td><td>Garage size (sq ft)</td></tr>
+      <tr><td>TotalBsmtSF</td><td>0.614</td><td>Total basement area (sq ft)</td></tr>
+      <tr><td>1stFlrSF</td><td>0.606</td><td>First floor area (sq ft)</td></tr>
+      <tr><td>FullBath</td><td>0.561</td><td>Number of full bathrooms</td></tr>
+      <tr><td>TotRmsAbvGrd</td><td>0.534</td><td>Total rooms above ground</td></tr>
+      <tr><td>YearBuilt</td><td>0.523</td><td>Year of construction</td></tr>
+      <tr><td>YearRemodAdd</td><td>0.507</td><td>Year of last remodel</td></tr>
+    </table>
+    <p>The top two predictors are <strong>quality</strong> (r=0.79) and <strong>size</strong> (r=0.71). This makes intuitive sense — a large, high-quality house costs more than a small, low-quality one.</p>
+
+    <h3 class="sub" style="color:var(--lin);">Missing Values : Context Matters</h3>
+    <p>19 columns had missing values, but most NaN values <strong>don't mean "missing data"</strong> : they mean "this feature doesn't exist." For example, PoolQC is 99.5% NaN because 99.5% of houses simply don't have a pool. These were filled with "None" (categorical) or 0 (numerical). LotFrontage was filled with the neighbourhood median since nearby houses share similar lot sizes.</p>
+
+    <h3 class="sub" style="color:var(--lin);">Outlier Removal</h3>
+    <p>Two houses with very large living area (>4,000 sq ft) but suspiciously low prices were removed : these are likely data entry errors or unusual sales (e.g., foreclosures) that would confuse the model.</p>
+  </div></div>
+</div>
+
+<!-- FEATURE ENGINEERING -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FEF3C7;">🔧</div>
+    <div><div class="section-title">Feature Engineering : Creating Signal from Raw Data</div><div class="section-subtitle">11 new features, ordinal encoding, skew correction — 79 → 216 columns</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>Feature engineering is what separates good Kaggle scores from great ones. The raw data has 79 columns, but many important concepts are split across multiple columns. By combining them, we create features that directly express what buyers care about.</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--feat);">New Feature</th><th style="background:var(--feat);">Formula</th><th style="background:var(--feat);">Why It Matters</th></tr>
+      <tr><td><strong>TotalSF</strong></td><td>TotalBsmtSF + 1stFlrSF + 2ndFlrSF</td><td>Total usable space : the #1 thing buyers care about</td></tr>
+      <tr><td><strong>TotalBath</strong></td><td>Full + 0.5×Half + BsmtFull + 0.5×BsmtHalf</td><td>Combined bathroom count (half baths worth 0.5)</td></tr>
+      <tr><td><strong>TotalPorch</strong></td><td>Open + Enclosed + 3Ssn + Screen + WoodDeck</td><td>Total outdoor living space</td></tr>
+      <tr><td><strong>HouseAge</strong></td><td>YrSold − YearBuilt</td><td>How old the house is at time of sale</td></tr>
+      <tr><td><strong>RemodAge</strong></td><td>YrSold − YearRemodAdd</td><td>Years since last renovation</td></tr>
+      <tr><td><strong>IsNew</strong></td><td>YearBuilt == YrSold</td><td>Binary: brand new house (premium price)</td></tr>
+      <tr><td><strong>HasPool</strong></td><td>PoolArea > 0</td><td>Binary: pool present</td></tr>
+      <tr><td><strong>HasGarage</strong></td><td>GarageArea > 0</td><td>Binary: garage present</td></tr>
+      <tr><td><strong>Has2ndFlr</strong></td><td>2ndFlrSF > 0</td><td>Binary: has second floor</td></tr>
+      <tr><td><strong>HasBsmt</strong></td><td>TotalBsmtSF > 0</td><td>Binary: has basement</td></tr>
+      <tr><td><strong>HasFireplace</strong></td><td>Fireplaces > 0</td><td>Binary: fireplace present</td></tr>
+    </table>
+
+    <div class="analogy"><strong>🏫 School Analogy:</strong> The raw data is like having a student's marks in 79 individual assignments. Feature engineering is like computing their GPA, attendance rate, and improvement trend, these derived metrics tell a much clearer story than any single assignment mark.</div>
+
+    <h3 class="sub" style="color:var(--feat);">Other Processing Steps</h3>
+    <p><strong>Ordinal encoding</strong> converted quality ratings (Ex > Gd > TA > Fa > Po) into numbers (5, 4, 3, 2, 1) preserving their natural order. <strong>Skew correction</strong> applied log1p to 38 highly skewed numerical features. <strong>One-hot encoding</strong> expanded the remaining categorical features. The final feature matrix grew from 79 columns to <strong>216 columns</strong>.</p>
+  </div></div>
+</div>
+
+<!-- MODELS -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D1FAE5;">🤖</div>
+    <div><div class="section-title">6 Models Compared : Linear vs Tree-Based</div><div class="section-subtitle">Ridge, Lasso, ElasticNet, GBR, XGBoost, LightGBM</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <div class="vs-grid">
+      <div class="vs-card" style="border-color:var(--lin);background:rgba(59,130,246,.03)">
+        <h4 style="color:var(--lin);">Linear Models</h4>
+        <p><strong>Ridge</strong> (L2): penalises large coefficients, keeps all features.<br><strong>Lasso</strong> (L1): drives weak coefficients to exactly 0 : automatic feature selection.<br><strong>ElasticNet</strong>: combines L1+L2.</p>
+      </div>
+      <div class="vs-card" style="border-color:var(--tree);background:rgba(16,185,129,.03)">
+        <h4 style="color:var(--tree);">Tree-Based Models</h4>
+        <p><strong>GBR</strong>: Gradient Boosting with huber loss (robust to outliers).<br><strong>XGBoost</strong>: regularised boosting with column subsampling.<br><strong>LightGBM</strong>: fast gradient boosting with leaf-wise growth.</p>
+      </div>
+    </div>
+
+    <h3 class="sub" style="color:var(--lin);">5-Fold Cross-Validation Results</h3>
+    <div class="bar-visual">
+      <div class="bar-row"><div class="bar-label" style="color:var(--lin);">Lasso ⭐</div><div class="bar-track"><div class="bar-fill" style="width:88.6%;background:var(--lin);">0.1141</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--lin);">ElasticNet</div><div class="bar-track"><div class="bar-fill" style="width:88.6%;background:#6366F1;">0.1143</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--lin);">Ridge</div><div class="bar-track"><div class="bar-fill" style="width:88.5%;background:#818CF8;">0.1147</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--tree);">GBR</div><div class="bar-track"><div class="bar-fill" style="width:88.4%;background:var(--tree);">0.1158</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--tree);">XGBoost</div><div class="bar-track"><div class="bar-fill" style="width:88.1%;background:#F59E0B;">0.1187</div></div></div>
+      <div class="bar-row"><div class="bar-label" style="color:var(--tree);">LightGBM</div><div class="bar-track"><div class="bar-fill" style="width:88.0%;background:#EF4444;">0.1201</div></div></div>
+    </div>
+    <p style="font-size:.8rem;color:var(--text2);">RMSE on log-transformed prices. Lower is better. Bars show relative performance.</p>
+
+    <div class="key-point"><strong>💡 Surprising Result:</strong> Linear models (Lasso, ElasticNet, Ridge) outperformed tree-based models (GBR, XGBoost, LightGBM) on this dataset! This happens because after feature engineering and log transforms, the relationship between features and prices is approximately linear. Linear models also handle the 216 one-hot-encoded features more gracefully than trees.</div>
+
+    <h3 class="sub" style="color:var(--lin);">Lasso's Feature Selection</h3>
+    <p>Lasso eliminated <strong>130 out of 216 features</strong> (set their coefficients to exactly 0), keeping only 86 active features. This automatic feature selection is one of Lasso's biggest advantages — it tells you which features actually matter and which are noise.</p>
+  </div></div>
+</div>
+
+<!-- ENSEMBLE -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#F3E8FF;">🎯</div>
+    <div><div class="section-title">Weighted Ensemble : Combining 6 Models</div><div class="section-subtitle">Different models make different errors : averaging exploits this</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>Instead of picking the single best model, we combine all 6 predictions using a <strong>weighted average</strong>, where better-performing models (lower CV RMSE) get more weight. The weights are computed as the inverse of each model's CV RMSE, normalised to sum to 1.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--lin);">Ridge<br>prediction</div>
+      <div class="flow-box" style="background:var(--lin);">Lasso<br>prediction</div>
+      <div class="flow-box" style="background:var(--lin);">ElasticNet<br>prediction</div>
+      <div class="flow-box" style="background:var(--tree);">GBR<br>prediction</div>
+      <div class="flow-box" style="background:var(--tree);">XGBoost<br>prediction</div>
+      <div class="flow-box" style="background:var(--tree);">LightGBM<br>prediction</div>
+    </div>
+    <div style="text-align:center;font-size:1.2rem;color:#94A3B8;margin:-8px 0 8px;">↓ weighted average ↓</div>
+    <div class="flow">
+      <div class="flow-box" style="background:var(--ens);padding:12px 24px;font-size:.85rem;">Final Ensemble<br>Prediction</div>
+    </div>
+
+    <div class="analogy"><strong>🏫 School Analogy:</strong> Imagine asking 6 different real estate agents to estimate a house's price. Each agent has different expertise (one knows the neighbourhood, another knows construction quality). The best estimate isn't from any single agent : it's the weighted average of all 6, giving more weight to the agents with better track records.</div>
+
+    <div class="info-box"><strong>📌 Why Ensembles Work:</strong> Linear models and tree-based models make <em>different types of errors</em>. Linear models struggle with non-linear interactions; trees struggle with extrapolation. Averaging their predictions cancels out individual weaknesses, producing a more robust prediction than any single model.</div>
+  </div></div>
+</div>
+
+<!-- KAGGLE SCORE -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FEF3C7;">🏆</div>
+    <div><div class="section-title">Kaggle Submission : Leaderboard Score</div><div class="section-subtitle">Real competition score on unseen test data</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>The final ensemble predictions were submitted to Kaggle, where they were scored against the actual (hidden) sale prices of 1,459 test houses.</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--ens);">Metric</th><th style="background:var(--ens);">Value</th></tr>
+      <tr><td>Kaggle RMSE Score</td><td><strong>0.12098</strong></td></tr>
+      <tr><td>Leaderboard Rank</td><td><strong>#337</strong> (first submission)</td></tr>
+      <tr><td>Best Individual CV RMSE</td><td>0.1141 (Lasso)</td></tr>
+    </table>
+
+    <p>The Kaggle score (0.12098) is slightly higher (worse) than the CV RMSE (0.1141) : this is normal and expected. CV scores are computed on the training data distribution, while Kaggle tests on a held-out set that may have slightly different characteristics. The gap is small, indicating the model generalises well.</p>
+  </div></div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div><div class="section-title">Summary</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <div class="key-point"><strong>🎯 Takeaway #1 Log Transform Is Essential.</strong> Transforming the right-skewed SalePrice (skewness 1.9 → 0.12) was the single biggest improvement. Without it, models try to minimise dollar errors, which are dominated by expensive houses.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #2 Feature Engineering > Model Selection.</strong> Creating 11 new features (TotalSF, TotalBath, HouseAge, etc.) improved every model. In tabular ML, the quality of your features matters more than which algorithm you use.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #3 Context-Aware Imputation Matters.</strong> Treating NaN as "doesn't exist" (no pool, no garage) instead of "missing data" preserved critical information. Blindly filling with mean/median would have lost this signal.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #4 Linear Models Won.</strong> After proper feature engineering and log transforms, Lasso (0.1141) beat XGBoost (0.1187) and LightGBM (0.1201). The data became approximately linear, and linear models handle high-dimensional one-hot features more gracefully.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #5 Lasso = Feature Selection for Free.</strong> Lasso eliminated 130 out of 216 features automatically, keeping only the 86 that actually predict price. This is both a regularisation technique and an interpretability tool.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #6 Ensembles Reduce Risk.</strong> Combining 6 models' predictions produces more robust estimates than any single model. Different model types (linear vs tree) make different errors, and averaging cancels them out.</div>
+
+    <div style="background:linear-gradient(135deg,#1E40AF,#10B981,#F59E0B);border-radius:14px;padding:20px;margin-top:16px;color:#fff;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">📋 Full Pipeline Summary:</h4>
+      <p style="opacity:.92;font-size:.87rem;">
+      EDA + correlation analysis → outlier removal (2 houses) → log1p target transform → combine train+test → context-aware missing value imputation → 11 engineered features → ordinal encoding (quality scales) → log1p on 38 skewed features → one-hot encoding (79 → 216 columns) → 6 models with 5-fold CV → weighted ensemble → Kaggle submission (RMSE 0.12098, Rank #337)
+      </p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>
