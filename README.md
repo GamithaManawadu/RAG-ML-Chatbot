@@ -6,7 +6,7 @@ A Retrieval-Augmented Generation chatbot that answers machine learning questions
 
 <p align="center">
   <img src="images/gradio_demo.png" width="48%">
-  <img src="images/retrieval_accuracy.png" width="48%">
+  <img src="images/chunk_size_vs_accuracy.png" width="48%">
 </p>
 
 ## What Is RAG?
