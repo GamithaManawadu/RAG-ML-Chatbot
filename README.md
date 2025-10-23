@@ -75,7 +75,7 @@ RAG-ML-Chatbot/
 ├── chroma_db/               # Persisted vector store (auto-generated)
 ├── Explanations/
 │   └── rag-chatbot-explained.html
-├── .env                     # API key (not uploaded to git)
+├── .env
 ├── .gitignore
 ├── requirements.txt
 ├── README.md

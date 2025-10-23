@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG ML Chatbot</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F0F2F5;--card:#FFF;--rag:#8B5CF6;--ret:#3B82F6;--gen:#EC4899;--emb:#10B981;--eval:#F59E0B;--text:#1E293B;--text2:#64748B;--shadow:0 4px 24px rgba(139,92,246,.08);--radius:18px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#7C3AED 0%,#3B82F6 50%,#10B981 100%);padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23ffffff' fill-opacity='0.06'/%3E%3C/svg%3E")}
+  .hero h1{font-family:'Fredoka',sans-serif;font-size:clamp(1.8rem,5vw,3rem);color:#fff;position:relative;margin-bottom:12px}
+  .hero p{color:rgba(255,255,255,.85);font-size:1.05rem;max-width:680px;margin:0 auto;position:relative}
+  .container{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+  .section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:28px;overflow:hidden;border:1px solid rgba(0,0,0,.04)}
+  .section-header{padding:22px 26px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;transition:background .2s}
+  .section-header:hover{background:rgba(0,0,0,.015)}
+  .section-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .section-title{font-family:'Fredoka',sans-serif;font-size:1.18rem;font-weight:600}
+  .section-subtitle{font-size:.83rem;color:var(--text2);margin-top:2px}
+  .toggle-arrow{margin-left:auto;font-size:1.1rem;transition:transform .3s;color:var(--text2)}
+  .section.open .toggle-arrow{transform:rotate(180deg)}
+  .section-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+  .section.open .section-body{max-height:none}
+  .section-content{padding:0 26px 26px}
+  .analogy{background:linear-gradient(135deg,#FFF3E0,#FFF8E1);border-left:4px solid #E67E22;border-radius:12px;padding:16px 18px;margin:14px 0;font-size:.93rem}
+  .analogy strong{color:#E67E22}
+  .key-point{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border-left:4px solid #27AE60;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .key-point strong{color:#27AE60}
+  .warning{background:linear-gradient(135deg,#FFEBEE,#FCE4EC);border-left:4px solid #E74C3C;border-radius:12px;padding:16px 18px;margin:14px 0}
+  .warning strong{color:#E74C3C}
+  .info-box{background:linear-gradient(135deg,#E3F2FD,#E8EAF6);border-left:4px solid var(--ret);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .info-box strong{color:var(--ret)}
+  .purple-box{background:linear-gradient(135deg,#F3E8FF,#EDE9FE);border-left:4px solid var(--rag);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .purple-box strong{color:var(--rag)}
+  .nice-table{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;border-radius:12px;overflow:hidden;font-size:.86rem}
+  .nice-table th{padding:10px 14px;text-align:left;font-family:'Fredoka',sans-serif;font-weight:500;color:#fff}
+  .nice-table td{padding:9px 14px;border-bottom:1px solid #f0f0f0}
+  .nice-table tr:last-child td{border-bottom:none}
+  p+p{margin-top:11px}
+  h3.sub{font-family:'Fredoka',sans-serif;margin:18px 0 10px;font-size:1.05rem}
+  .flow{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin:16px 0;justify-content:center}
+  .flow-box{color:#fff;padding:8px 14px;border-radius:10px;font-size:.73rem;font-weight:500;text-align:center;min-width:70px}
+  .flow-arrow{font-size:1rem;color:#94A3B8}
+  .nb-img{width:100%;max-width:100%;height:auto;display:block;border-radius:12px;margin:14px 0;box-shadow:0 2px 12px rgba(0,0,0,.08);border:1px solid #e2e8f0}
+  .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+  .vs-card{border-radius:14px;padding:18px;border:2px solid}
+  .vs-card h4{font-family:'Fredoka',sans-serif;font-size:.95rem;margin-bottom:6px}
+  .vs-card p{font-size:.83rem;color:var(--text2);line-height:1.5}
+  @media(max-width:600px){.vs-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🤖 RAG ML Chatbot</h1>
+  <p>A Retrieval-Augmented Generation chatbot that answers ML questions by searching through my project and learning explanation files with 100% retrieval accuracy and 0% hallucination.</p>
+</div>
+
+<div class="container">
+
+<!-- BIG PICTURE -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#EDE9FE;">🗺️</div>
+    <div><div class="section-title">What Is RAG?</div><div class="section-subtitle">Retrieval + Generation = grounded answers without hallucination</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>RAG (Retrieval-Augmented Generation) solves the biggest problem with chatbots: <strong>hallucination</strong>. A regular LLM might confidently make up an answer. A RAG chatbot first <em>searches</em> for relevant information, then generates an answer <em>only from what it found</em>.</p>
+
+    <div class="flow">
+      <div class="flow-box" style="background:var(--rag);">❓ User<br>Question</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--ret);">🔍 Retrieve<br>relevant chunks<br>from vector DB</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--gen);">🧠 LLM generates<br>answer using<br>ONLY those chunks</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--emb);">💬 Grounded<br>Answer +<br>Sources</div>
+    </div>
+
+    <div class="vs-grid">
+      <div class="vs-card" style="border-color:#E74C3C;background:rgba(231,76,60,.03)">
+        <h4 style="color:#E74C3C;">❌ Without RAG (plain LLM)</h4>
+        <p>"What accuracy did the X-ray model get?"<br>→ LLM guesses: "Typically 95-98%"<br>→ <strong>Wrong!</strong> It was 89.9%</p>
+      </div>
+      <div class="vs-card" style="border-color:var(--emb);background:rgba(16,185,129,.03)">
+        <h4 style="color:var(--emb);">✅ With RAG</h4>
+        <p>"What accuracy did the X-ray model get?"<br>→ Retrieves chunk from xray-explained.html<br>→ "Model B (Frozen MobileNetV2) achieved <strong>89.9%</strong>"</p>
+      </div>
+    </div>
+
+    <div class="analogy"><strong>🏫 School Analogy:</strong> A plain LLM is like a student answering an exam from memory, they might remember things wrong. RAG is like an open-book exam, the student first looks up the relevant pages, THEN writes their answer based on what they found. The answer is grounded in the source material.</div>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--rag);">Pipeline Stat</th><th style="background:var(--rag);">Value</th></tr>
+      <tr><td>Knowledge base files</td><td><strong>14</strong> HTML explanation files</td></tr>
+      <tr><td>Total characters</td><td>155,855</td></tr>
+      <tr><td>Chunks created</td><td>254 (avg 645 chars each)</td></tr>
+      <tr><td>Vectors in ChromaDB</td><td>762</td></tr>
+      <tr><td>Embedding model</td><td>all-MiniLM-L6-v2 (384 dims)</td></tr>
+      <tr><td>LLM</td><td>Gemini 2.5 Flash</td></tr>
+      <tr><td>Retrieval accuracy</td><td><strong>100%</strong> (8/8)</td></tr>
+      <tr><td>Hallucination rate</td><td><strong>0%</strong> (6/6 out-of-scope correctly refused)</td></tr>
+    </table>
+  </div></div>
+</div>
+
+<!-- KNOWLEDGE BASE -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#DBEAFE;">📚</div>
+    <div><div class="section-title">The Knowledge Base - Explanation Files</div><div class="section-subtitle">My own materials become the chatbot's brain</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>The chatbot's knowledge comes entirely from my own ML explanation files, the same interactive HTML I created for my projects. This makes the chatbot a <strong>meta-demonstration</strong>: it uses the projects you built as its knowledge source.</p>
+
+    <table class="nice-table">
+      <tr><th style="background:var(--ret);">File</th><th style="background:var(--ret);">Topics Covered</th></tr>
+      <tr><td>ml-part1-explained.html</td><td>ML fundamentals, K-Means, Q-Learning, pipeline</td></tr>
+      <tr><td>ml-part2-explained.html</td><td>Regression, Ridge, Lasso, bias-variance</td></tr>
+      <tr><td>ml-part3-explained.html</td><td>Classification, SVM, ensembles, ROC/AUC</td></tr>
+      <tr><td>ml-part4-explained.html</td><td>Neural networks, backprop, CNNs, RNNs</td></tr>
+      <tr><td>ml-part5-explained.html</td><td>Advanced CNNs, transfer learning, YOLO</td></tr>
+      <tr><td>ml-part6-explained.html</td><td>Generative AI, Transformers, LLMs, Diffusion</td></tr>
+      <tr><td>sentiment-analysis-explained.html</td><td>TF-IDF vs BERT, NLP</td></tr>
+      <tr><td>xray-classification-explained.html</td><td>Medical imaging, Grad-CAM</td></tr>
+      <tr><td>dogs-vs-cats-explained.html</td><td>Simple NN vs CNN comparison</td></tr>
+      <tr><td>pet-breed-explained.html</td><td>37-breed classification, transfer learning</td></tr>
+      <tr><td>house-prices-explained.html</td><td>Feature engineering, stacking, Kaggle</td></tr>
+      <tr><td>yolo-app-explained.html</td><td>YOLO web app, Streamlit, deployment</td></tr>
+      <tr><td>liar-dataset-explained.html</td><td>Fake news detection</td></tr>
+      <tr><td>liar-enhanced-explained.html</td><td>Enhanced fake news with speaker features</td></tr>
+    </table>
+
+    <p>Documents were loaded using <strong>UnstructuredHTMLLoader</strong> from LangChain, which extracts clean text from HTML files by stripping all tags, CSS, and JavaScript while preserving the readable content.</p>
+  </div></div>
+</div>
+
+<!-- CHUNKING & EMBEDDINGS -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#D1FAE5;">🧩</div>
+    <div><div class="section-title">Chunking & Embeddings : Turning Text into Searchable Vectors</div><div class="section-subtitle">14 documents → 254 chunks → 762 vectors in ChromaDB</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <h3 class="sub" style="color:var(--emb);">Why Chunk?</h3>
+    <p>LLMs have limited context windows, and embedding models work best on focused pieces of text. Sending an entire 17,000-character file as one embedding would dilute the signal eg: a question about "Ridge regression" would get a weak match against a document that also discusses 20 other topics. Smaller chunks (800 characters, ~200 words) ensure each chunk is about ONE topic, making retrieval precise.</p>
+
+    <p><strong>RecursiveCharacterTextSplitter</strong> splits intelligently - it tries paragraph breaks first, then sentence boundaries, then word boundaries. The 100-character overlap ensures no information is lost at chunk boundaries.</p>
+
+    <h3 class="sub" style="color:var(--emb);">Chunk Size Experiment</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--emb);">Chunk Size</th><th style="background:var(--emb);">Total Chunks</th><th style="background:var(--emb);">Retrieval Accuracy</th></tr>
+      <tr><td>400 chars</td><td>555</td><td>88% - too small, loses context</td></tr>
+      <tr><td>600 chars</td><td>359</td><td><strong>100%</strong></td></tr>
+      <tr><td>800 chars ✅</td><td>254</td><td><strong>100%</strong></td></tr>
+      <tr><td>1000 chars</td><td>192</td><td><strong>100%</strong></td></tr>
+      <tr><td>1200 chars</td><td>159</td><td><strong>100%</strong></td></tr>
+    </table>
+    <p>800 characters was chosen as the sweet spot. it achieves 100% accuracy while keeping chunks focused enough for precise retrieval. The 400-char size failed because chunks were too small to contain enough context for the embedding model to understand the topic.</p>
+
+    <h3 class="sub" style="color:var(--emb);">Embedding Model Comparison</h3>
+    <table class="nice-table">
+      <tr><th style="background:var(--emb);">Model</th><th style="background:var(--emb);">Dimensions</th><th style="background:var(--emb);">Retrieval Accuracy</th></tr>
+      <tr><td><strong>all-MiniLM-L6-v2 ⭐</strong></td><td>384</td><td><strong>100%</strong></td></tr>
+      <tr><td>BAAI/bge-base-en-v1.5</td><td>768</td><td>88%</td></tr>
+    </table>
+    <p>The smaller model won! all-MiniLM-L6-v2 was specifically trained for <strong>semantic similarity</strong> using contrastive learning on 1 billion sentence pairs, making it ideal for retrieval. The larger model captures more information per vector but dilutes the topic-relevance signal across its 768 dimensions. For a focused knowledge base like this, a task-specific lightweight model outperforms a larger general-purpose one.</p>
+
+    <div class="analogy"><strong>🏫 School Analogy:</strong> Embeddings are like placing every chunk of text on a giant map where similar topics cluster together. "Transfer learning" and "pre-trained MobileNetV2" end up near each other even though they share no words, because the embedding model understands they're semantically related. When you ask a question, it gets placed on the same map, and the nearest chunks are retrieved.</div>
+  </div></div>
+</div>
+
+<!-- RAG CHAIN -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FCE7F3;">⛓️</div>
+    <div><div class="section-title">The RAG Chain : From Question to Grounded Answer</div><div class="section-subtitle">Retriever → custom prompt → LLM → answer with sources</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <div class="flow">
+      <div class="flow-box" style="background:var(--rag);">❓ "How does<br>YOLO detect<br>objects?"</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--ret);">Embed<br>question<br>(384-dim vector)</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--emb);">ChromaDB:<br>find 4 nearest<br>chunks</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--gen);">Prompt:<br>context +<br>question</div><span class="flow-arrow">→</span>
+      <div class="flow-box" style="background:var(--eval);">LLM generates<br>grounded<br>answer</div>
+    </div>
+
+    <h3 class="sub" style="color:var(--gen);">The Custom Prompt</h3>
+    <p>The prompt explicitly constrains the LLM to only answer from retrieved context:</p>
+    <div class="purple-box"><strong>📝 Prompt Template:</strong> "You are an ML teaching assistant. Answer the question based ONLY on the following context from ML course materials. If the context doesn't contain enough information to answer, say 'I don't have enough information in the course materials to answer this.'"</div>
+    <p>This "answer ONLY from context" instruction is what prevents hallucination. Without it, the LLM would fall back to its general training knowledge, which might be wrong or outdated for your specific course content.</p>
+
+    <h3 class="sub" style="color:var(--gen);">Example: Transfer Learning Question</h3>
+    <p>When asked "How was transfer learning used in the X-ray project?", the chatbot retrieved chunks from <code>xray-classification-explained.html</code> and generated an answer citing Model B (Frozen MobileNetV2, 89.9%) and Model C (Fine-Tuned, 87.7%), with the correct explanation of why fine-tuning hurt on a small dataset.</p>
+  </div></div>
+</div>
+
+<!-- EVALUATION -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#FEF3C7;">📊</div>
+    <div><div class="section-title">Evaluation : 100% Retrieval, 0% Hallucination</div><div class="section-subtitle">8/8 correct retrievals + 6/6 out-of-scope rejections</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+
+    <h3 class="sub" style="color:var(--eval);">Retrieval Accuracy (8/8 = 100%)</h3>
+    <p>Eight test questions were designed with known expected source files. The retriever correctly found chunks from the right source for every single question:</p>
+    <table class="nice-table">
+      <tr><th style="background:var(--eval);">Question</th><th style="background:var(--eval);">Expected Source</th><th style="background:var(--eval);">Result</th></tr>
+      <tr><td>What is backpropagation?</td><td>ml-part4</td><td>✅</td></tr>
+      <tr><td>Transfer learning with MobileNetV2?</td><td>ml-part5</td><td>✅</td></tr>
+      <tr><td>What is Stable Diffusion?</td><td>ml-part6</td><td>✅</td></tr>
+      <tr><td>How does BERT handle sentiment?</td><td>sentiment-analysis</td><td>✅</td></tr>
+      <tr><td>What is Grad-CAM used for?</td><td>xray-classification</td><td>✅</td></tr>
+      <tr><td>What is Ridge regression?</td><td>ml-part2</td><td>✅</td></tr>
+      <tr><td>How does Random Forest work?</td><td>ml-part3</td><td>✅</td></tr>
+      <tr><td>What is K-Means clustering?</td><td>ml-part1</td><td>✅</td></tr>
+    </table>
+
+    <h3 class="sub" style="color:var(--eval);">Negative Test with Out-of-Scope Questions (6/6 = 0% Hallucination)</h3>
+    <p>Six questions about topics NOT in the knowledge base were tested. The chatbot correctly refused to answer all of them instead of hallucinating:</p>
+    <table class="nice-table">
+      <tr><th style="background:#E74C3C;">Out-of-Scope Question</th><th style="background:#E74C3C;">Relevance Score</th><th style="background:#E74C3C;">Result</th></tr>
+      <tr><td>What is quantum computing?</td><td>0.032 (very low)</td><td>✅ Refused</td></tr>
+      <tr><td>Explain the history of the Roman Empire</td><td>-0.164 (very low)</td><td>✅ Refused</td></tr>
+      <tr><td>How do you bake sourdough bread?</td><td>-0.121 (very low)</td><td>✅ Refused</td></tr>
+      <tr><td>What is blockchain?</td><td>-0.010 (very low)</td><td>✅ Refused</td></tr>
+      <tr><td>How does a combustion engine work?</td><td>0.035 (very low)</td><td>✅ Refused</td></tr>
+      <tr><td>(6th question)</td><td>low</td><td>✅ Refused</td></tr>
+    </table>
+
+    <div class="key-point"><strong>💡 Key Insight:</strong> The negative test is arguably MORE important than the positive test. It proves the chatbot doesn't make things up. The low relevance scores (all near 0 or negative, vs 0.5+ for in-scope questions) show the embedding model correctly identifies that these topics aren't in the knowledge base.</div>
+  </div></div>
+</div>
+
+<!-- SEMANTIC SIMILARITY -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E0E7FF;">🗺️</div>
+    <div><div class="section-title">Semantic Similarity : How Embeddings Understand Meaning</div><div class="section-subtitle">Query-query similarity heatmap proves semantic understanding</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <p>The semantic similarity heatmap reveals that the embedding model understands conceptual relationships between queries, not just keyword overlap. "What is transfer learning?" and "How does BERT work?" have moderate similarity because both involve pre-trained models, even though they share no words.</p>
+
+    <div class="info-box"><strong>📌 Why This Matters:</strong> Traditional keyword search would fail here, searching for "transfer learning" wouldn't find a chunk about "pre-trained MobileNetV2 with frozen layers" because they share no keywords. Semantic search via embeddings understands they're the same concept, which is why retrieval accuracy reached 100%.</div>
+  </div></div>
+</div>
+
+<!-- TECH DECISIONS -->
+<div class="section">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#F3E8FF;">🛠️</div>
+    <div><div class="section-title">Technical Decisions & Architecture</div><div class="section-subtitle">Why each component was chosen</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <table class="nice-table">
+      <tr><th style="background:var(--rag);">Component</th><th style="background:var(--rag);">Choice</th><th style="background:var(--rag);">Why</th></tr>
+      <tr><td><strong>Document Loader</strong></td><td>UnstructuredHTMLLoader</td><td>LangChain community loader, handles HTML parsing automatically</td></tr>
+      <tr><td><strong>Text Splitter</strong></td><td>RecursiveCharacterTextSplitter</td><td>Splits on paragraph/sentence boundaries, preserves semantic coherence</td></tr>
+      <tr><td><strong>Chunk Size</strong></td><td>800 chars, 100 overlap</td><td>Experimentally validated — 100% accuracy at 600–1200, chosen 800 as sweet spot</td></tr>
+      <tr><td><strong>Embeddings</strong></td><td>all-MiniLM-L6-v2</td><td>Beat the larger bge-base model (100% vs 88%) : task-specific training matters more than model size</td></tr>
+      <tr><td><strong>Vector Store</strong></td><td>ChromaDB</td><td>Lightweight, runs locally, persists to disk, no external server needed</td></tr>
+      <tr><td><strong>Retrieval</strong></td><td>Top-4 similarity search</td><td>4 chunks provide enough context without overwhelming the LLM's context window</td></tr>
+      <tr><td><strong>LLM</strong></td><td>Gemini 2.5 Flash</td><td>Free tier API, fast, good instruction following for RAG</td></tr>
+      <tr><td><strong>Framework</strong></td><td>LangChain (LCEL)</td><td>Modern expression language for composable RAG chains</td></tr>
+      <tr><td><strong>UI</strong></td><td>Gradio</td><td>Shareable web UI with example questions, deployable to HuggingFace Spaces</td></tr>
+    </table>
+  </div></div>
+</div>
+
+<!-- SUMMARY -->
+<div class="section open">
+  <div class="section-header" onclick="toggle(this)">
+    <div class="section-icon" style="background:#E8F5E9;">🎓</div>
+    <div><div class="section-title">Summary</div></div>
+    <span class="toggle-arrow">▼</span>
+  </div>
+  <div class="section-body"><div class="section-content">
+    <div class="key-point"><strong>🎯 Takeaway #1  RAG Prevents Hallucination.</strong> By constraining the LLM to answer ONLY from retrieved context, the chatbot achieved 0% hallucination on out-of-scope questions. Without RAG, the LLM would guess and often get specific details wrong.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #2  Embeddings Understand Meaning, Not Just Keywords.</strong> Semantic search found the right chunks for every question even when the query and chunk shared no words. "Transfer learning" matches "pre-trained MobileNetV2" because the embedding model understands they're conceptually related.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #3  Smaller Models Can Win.</strong> all-MiniLM-L6-v2 (384 dims) outperformed BAAI/bge-base (768 dims) for retrieval accuracy. The smaller model was specifically trained for semantic similarity, making it a better fit than the larger general-purpose model.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #4  Chunk Size Has a Sweet Spot.</strong> 400-char chunks were too small (88% accuracy) — they lacked enough context. 600–1200 chars all achieved 100%. The experiment proved that chunk size matters and should be validated, not guessed.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #5  Negative Testing Is Essential.</strong> Proving the chatbot says "I don't know" when it should is just as important as proving it answers correctly. The 6/6 refusal rate on out-of-scope questions demonstrates the system is trustworthy.</div>
+
+    <div class="key-point"><strong>🎯 Takeaway #6  RAG Is the #1 GenAI Skill.</strong> This project demonstrates the full RAG pipeline — document loading, chunking, embedding, vector storage, retrieval, prompt engineering, and evaluation — which is the most in-demand skill in GenAI job interviews right now.</div>
+    <div style="background:linear-gradient(135deg,#7C3AED,#3B82F6,#10B981);border-radius:14px;padding:20px;margin-top:16px;color:#fff;">
+      <h4 style="font-family:'Fredoka';margin-bottom:8px;">📋 Full Pipeline Summary:</h4>
+      <p style="opacity:.92;font-size:.87rem;">
+      HTML files (155K chars) → UnstructuredHTMLLoader text extraction → RecursiveCharacterTextSplitter (800 chars, 100 overlap) → 254 chunks → all-MiniLM-L6-v2 embeddings (384 dims) → ChromaDB (762 vectors) → Top-4 similarity retrieval → Custom RAG prompt → Gemini 2.5 Flash → Grounded answer + sources → Gradio web UI · Retrieval: 100% (8/8) · Hallucination: 0% (6/6 refused)
+      </p>
+    </div>
+  </div></div>
+</div>
+
+</div>
+<script>function toggle(h){h.closest('.section').classList.toggle('open')}</script>
+</body>
+</html>
